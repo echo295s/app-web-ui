@@ -1,11 +1,14 @@
 # app-web-ui
 
-GitHub Pages serves the static frontend from the repository root.
+GitHub Pages で静的フロントエンドを公開するリポジトリです。
 
-- `index.html`: login page for GitHub Pages
-- `post.html`: post form page
-- `script.js`: frontend API client and sessionStorage token handling
-- `style.css`: shared styles
-- `gas/`: Google Apps Script API code
+- `index.html`: ログインページ
+- `post.html`: 投稿フォーム
+- `script.js`: API 呼び出しと `sessionStorage` によるトークン管理
+- `style.css`: 共通スタイル
+- `gas/`: Google Apps Script API コード
 
-The real password must be stored only in Apps Script Script Properties as `APP_PASSWORD`. Do not commit the password to this repository.
+実際のパスワードは Apps Script のスクリプト プロパティに
+`APP_PASSWORD` として保存します。
+
+パスワードをこのリポジトリにコミットしないでください。

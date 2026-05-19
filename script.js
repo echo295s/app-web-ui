@@ -1,5 +1,4 @@
 const API_ENDPOINT_URL = "";
-const API_QUERY_PARAMS = {};
 const SESSION_TOKEN_KEY = "app_session_token";
 
 const loginForm = document.querySelector("#login-form");
@@ -12,11 +11,7 @@ function requestUrl() {
     throw new Error("API_ENDPOINT_URL が未設定です。");
   }
 
-  const url = new URL(API_ENDPOINT_URL);
-  Object.entries(API_QUERY_PARAMS).forEach(([key, value]) => {
-    url.searchParams.set(key, value);
-  });
-  return url;
+  return new URL(API_ENDPOINT_URL);
 }
 
 function getSessionToken() {

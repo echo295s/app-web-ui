@@ -1,32 +1,35 @@
 # GAS API
 
-This folder contains code that is safe to keep in a public repository.
-Do not write the real password in this folder.
+このフォルダには、公開リポジトリに置いてよい Google Apps Script のコードを置きます。
 
-## Deploy
+実際のパスワードはこのフォルダ内のコードや README には書かないでください。
 
-1. Open the Google Apps Script editor.
-2. Copy `Code.gs` into the Apps Script project.
-3. Open Project Settings.
-4. Add a Script Property:
-   - Property: `APP_PASSWORD`
-   - Value: the real login password
-5. Deploy as a Web app.
-6. Set the Web app URL in `script.js` as `API_ENDPOINT_URL`.
+## デプロイ手順
 
-The API expects login requests like:
+1. Google Apps Script エディタを開く。
+2. `Code.gs` の内容を Apps Script プロジェクトへコピーする。
+3. プロジェクトの設定を開く。
+4. スクリプト プロパティを追加する。
+   - プロパティ: `APP_PASSWORD`
+   - 値: 実際のログインパスワード
+5. Web アプリとしてデプロイする。
+6. 発行された Web アプリ URL を `script.js` の `API_ENDPOINT_URL` に設定する。
+
+## リクエスト形式
+
+ログイン時:
 
 ```json
 {
   "action": "login",
-  "password": "password typed by the user"
+  "password": "ユーザーが入力したパスワード"
 }
 ```
 
-After login, normal requests must include:
+ログイン後の通常リクエスト:
 
 ```json
 {
-  "token": "session token returned by login"
+  "token": "ログイン時に返されたセッショントークン"
 }
 ```
