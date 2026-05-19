@@ -12,33 +12,35 @@ function requestUrl() {
   return url;
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  result.textContent = "送信中...";
+if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    result.textContent = "送信中...";
 
-  const formData = new FormData(form);
-  const body = {
-    category: formData.get("category"),
-    title: formData.get("title"),
-    body: formData.get("body"),
-  };
+    const formData = new FormData(form);
+    const body = {
+      category: formData.get("category"),
+      title: formData.get("title"),
+      body: formData.get("body"),
+    };
 
-  try {
-    const response = await fetch(requestUrl(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await response.json();
+    try {
+      const response = await fetch(requestUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
 
-    if (data.status === "success") {
-      result.textContent = "成功しました。";
-      return;
+      if (data.status === "success") {
+        result.textContent = "成功しました。";
+        return;
+      }
+
+      result.textContent =
+        data.message === "Unauthorized" ? "認証に失敗しました。" : "エラーです。";
+    } catch (error) {
+      result.textContent = error.message;
     }
-
-    result.textContent =
-      data.message === "Unauthorized" ? "認証に失敗しました。" : "エラーです。";
-  } catch (error) {
-    result.textContent = error.message;
-  }
-});
+  });
+}

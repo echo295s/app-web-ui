@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>投稿フォーム</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>投稿フォーム</h1>
+
+      <form id="post-form">
+        <label>
+          Category
+          <input name="category" required />
+        </label>
+
+        <label>
+          Title
+          <input name="title" required />
+        </label>
+
+        <label>
+          Body
+          <textarea name="body" rows="6" required></textarea>
+        </label>
+
+        <button type="submit">送信</button>
+      </form>
+
+      <p id="result">未送信です。</p>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
