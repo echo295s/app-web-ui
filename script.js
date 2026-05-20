@@ -8,7 +8,7 @@ const logoutButton = document.querySelector("#logout-button");
 
 function requestUrl() {
   if (!API_ENDPOINT_URL) {
-    throw new Error("API_ENDPOINT_URL が未設定です。");
+    throw new Error("API_ENDPOINT_URL is not configured.");
   }
 
   return new URL(API_ENDPOINT_URL);
@@ -52,7 +52,7 @@ async function requestJson(body) {
     };
     const timeoutId = window.setTimeout(() => {
       cleanup();
-      reject(new Error("API request timed out"));
+      reject(new Error("API request timed out."));
     }, 15000);
 
     window[callbackName] = (data) => {
@@ -64,7 +64,7 @@ async function requestJson(body) {
     script.onerror = () => {
       window.clearTimeout(timeoutId);
       cleanup();
-      reject(new Error("API request failed"));
+      reject(new Error("API request failed."));
     };
 
     script.src = url.toString();
@@ -119,18 +119,23 @@ if (postForm) {
     result.textContent = "送信中...";
 
     const formData = new FormData(postForm);
-    const body = {
-      token: getSessionToken(),
+    const rawData = JSON.stringify({
       category: formData.get("category"),
       title: formData.get("title"),
       body: formData.get("body"),
+    });
+    const body = {
+      action: "create",
+      token: getSessionToken(),
+      rawData,
     };
 
     try {
       const data = await requestJson(body);
 
       if (data.status === "success") {
-        result.textContent = "成功しました。";
+        result.textContent = "保存しました。";
+        postForm.reset();
         return;
       }
 
