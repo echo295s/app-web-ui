@@ -3,35 +3,92 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>投稿フォーム</title>
+    <title>データ管理</title>
     <link rel="icon" href="./favicon.ico" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main>
-      <h1>投稿フォーム</h1>
+      <div class="page-header">
+        <h1>データ管理</h1>
+        <button id="logout-button" type="button">ログアウト</button>
+      </div>
 
-      <form id="post-form">
-        <label>
-          Category
-          <input name="category" required />
-        </label>
+      <section class="panel" aria-labelledby="post-heading">
+        <h2 id="post-heading">新規登録</h2>
+        <form id="post-form">
+          <label>
+            Data
+            <textarea
+              name="rawData"
+              rows="8"
+              placeholder='{"key":"value"}'
+              required
+            ></textarea>
+          </label>
 
-        <label>
-          Title
-          <input name="title" required />
-        </label>
+          <button type="submit">送信</button>
+        </form>
 
-        <label>
-          Body
-          <textarea name="body" rows="6" required></textarea>
-        </label>
+        <p id="result">未送信です。</p>
+      </section>
 
-        <button type="submit">送信</button>
-      </form>
+      <section class="panel" aria-labelledby="list-heading">
+        <div class="section-header">
+          <h2 id="list-heading">データ一覧</h2>
+          <button id="refresh-button" type="button">更新</button>
+        </div>
 
-      <button id="logout-button" type="button">ログアウト</button>
-      <p id="result">未送信です。</p>
+        <form id="search-form" class="tools">
+          <label>
+            Search
+            <input
+              id="search-input"
+              name="search"
+              type="search"
+              placeholder="キーワード検索"
+            />
+          </label>
+
+          <label>
+            Search target
+            <select id="search-target" name="searchTarget">
+              <option value="all">すべて</option>
+              <option value="rawData">Data</option>
+              <option value="id">ID</option>
+              <option value="timestamp">Timestamp</option>
+            </select>
+          </label>
+
+          <label>
+            Mock filter
+            <select id="filter-target" name="filterTarget">
+              <option value="all">すべて</option>
+              <option value="json">JSON形式</option>
+              <option value="text">テキスト形式</option>
+              <option value="hasId">IDあり</option>
+            </select>
+          </label>
+        </form>
+
+        <p id="list-result">未取得です。</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody id="records-body">
+              <tr>
+                <td colspan="3">データがありません。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
 
     <script src="script.js"></script>

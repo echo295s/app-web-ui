@@ -3,8 +3,17 @@ const SESSION_TOKEN_KEY = "app_session_token";
 
 const loginForm = document.querySelector("#login-form");
 const postForm = document.querySelector("#post-form");
+const searchForm = document.querySelector("#search-form");
 const result = document.querySelector("#result");
+const listResult = document.querySelector("#list-result");
+const recordsBody = document.querySelector("#records-body");
 const logoutButton = document.querySelector("#logout-button");
+const refreshButton = document.querySelector("#refresh-button");
+const searchInput = document.querySelector("#search-input");
+const searchTarget = document.querySelector("#search-target");
+const filterTarget = document.querySelector("#filter-target");
+
+let records = [];
 
 function requestUrl() {
   if (!API_ENDPOINT_URL) {
@@ -72,6 +81,147 @@ async function requestJson(body) {
   });
 }
 
+function buildPostData(formData) {
+  return String(formData.get("rawData") || "").trim();
+}
+
+function isJsonRawData(rawData) {
+  if (!rawData) {
+    return false;
+  }
+
+  try {
+    JSON.parse(rawData);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function recordView(record) {
+  return {
+    id: record.id || "",
+    timestamp: record.timestamp || "",
+    deleted: Boolean(record.deleted),
+    rawData: record.rawData || "",
+    isJson: isJsonRawData(record.rawData),
+  };
+}
+
+function formatTimestamp(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function matchesSearch(record) {
+  const keyword = String(searchInput ? searchInput.value : "").trim().toLowerCase();
+  const target = searchTarget ? searchTarget.value : "all";
+
+  if (!keyword) {
+    return true;
+  }
+
+  const fields =
+    target === "all"
+      ? [record.rawData, record.id, record.timestamp]
+      : [record[target]];
+
+  return fields.some((value) => String(value || "").toLowerCase().includes(keyword));
+}
+
+function matchesMockFilter(record) {
+  const target = filterTarget ? filterTarget.value : "all";
+
+  if (target === "json") {
+    return record.isJson;
+  }
+
+  if (target === "text") {
+    return !record.isJson;
+  }
+
+  if (target === "hasId") {
+    return record.id.trim() !== "";
+  }
+
+  return true;
+}
+
+function renderRecords() {
+  if (!recordsBody) {
+    return;
+  }
+
+  const rows = records.map(recordView).filter(matchesSearch).filter(matchesMockFilter);
+  recordsBody.innerHTML = "";
+
+  if (rows.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 3;
+    cell.textContent = "該当するデータがありません。";
+    row.appendChild(cell);
+    recordsBody.appendChild(row);
+
+    if (listResult) {
+      listResult.textContent = `${records.length}件中 0件を表示しています。`;
+    }
+    return;
+  }
+
+  rows.forEach((record) => {
+    const row = document.createElement("tr");
+    [record.id, record.rawData, formatTimestamp(record.timestamp)].forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = value || "-";
+      row.appendChild(cell);
+    });
+    recordsBody.appendChild(row);
+  });
+
+  if (listResult) {
+    listResult.textContent = `${records.length}件中 ${rows.length}件を表示しています。`;
+  }
+}
+
+async function loadRecords() {
+  if (!recordsBody || !listResult) {
+    return;
+  }
+
+  listResult.textContent = "取得中...";
+
+  try {
+    const data = await requestJson({
+      action: "list",
+      token: getSessionToken(),
+    });
+
+    if (data.status === "success") {
+      records = Array.isArray(data.records) ? data.records : [];
+      renderRecords();
+      return;
+    }
+
+    listResult.textContent =
+      data.message === "Unauthorized" ? "認証に失敗しました。" : "一覧の取得に失敗しました。";
+  } catch (error) {
+    listResult.textContent = error.message;
+  }
+}
+
 if (loginForm) {
   if (getSessionToken()) {
     redirectToPost();
@@ -119,11 +269,13 @@ if (postForm) {
     result.textContent = "送信中...";
 
     const formData = new FormData(postForm);
-    const rawData = JSON.stringify({
-      category: formData.get("category"),
-      title: formData.get("title"),
-      body: formData.get("body"),
-    });
+    const rawData = buildPostData(formData);
+
+    if (!rawData) {
+      result.textContent = "データを入力してください。";
+      return;
+    }
+
     const body = {
       action: "create",
       token: getSessionToken(),
@@ -136,6 +288,7 @@ if (postForm) {
       if (data.status === "success") {
         result.textContent = "保存しました。";
         postForm.reset();
+        await loadRecords();
         return;
       }
 
@@ -145,4 +298,18 @@ if (postForm) {
       result.textContent = error.message;
     }
   });
+
+  if (refreshButton) {
+    refreshButton.addEventListener("click", loadRecords);
+  }
+
+  if (searchForm) {
+    searchForm.addEventListener("input", renderRecords);
+    searchForm.addEventListener("change", renderRecords);
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+  }
+
+  loadRecords();
 }
