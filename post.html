@@ -15,7 +15,10 @@
       </div>
 
       <section class="panel" aria-labelledby="post-heading">
-        <h2 id="post-heading">新規登録</h2>
+        <div class="section-header">
+          <h2 id="post-heading">新規登録</h2>
+          <button class="submit-button" type="submit" form="post-form">送信</button>
+        </div>
         <form id="post-form">
           <div class="field-group">
             <table class="data-fields-table">
@@ -38,8 +41,6 @@
             </table>
             <button id="add-field-button" type="button">＋</button>
           </div>
-
-          <button type="submit">送信</button>
         </form>
 
         <p id="result">未送信です。</p>
