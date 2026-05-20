@@ -2,6 +2,10 @@ const APP_PASSWORD_PROPERTY = "APP_PASSWORD";
 const SESSION_CACHE_PREFIX = "session:";
 const SESSION_TTL_SECONDS = 21600;
 
+/* ここからリクエスト受付 */
+
+// WebアプリにPOSTされたリクエストの入口。
+// ログイン要求だけは先に処理し、それ以外は認証後に投稿処理へ渡す。
 function doPost(e) {
   try {
     const payload = parseJsonPayload(e);
@@ -24,6 +28,8 @@ function doPost(e) {
   }
 }
 
+// Apps ScriptのイベントオブジェクトからJSON本文を取り出す。
+// 本文が空の場合は、後続処理で扱いやすいように空オブジェクトを返す。
 function parseJsonPayload(e) {
   if (!e || !e.postData || !e.postData.contents) {
     return {};
@@ -32,6 +38,10 @@ function parseJsonPayload(e) {
   return JSON.parse(e.postData.contents);
 }
 
+/* ここから認証 */
+
+// スクリプトプロパティに保存されたパスワードと照合し、
+// 成功した場合は一時的なセッショントークンを発行する。
 function login(password) {
   const savedPassword = PropertiesService
     .getScriptProperties()
@@ -52,6 +62,8 @@ function login(password) {
   });
 }
 
+// 投稿などログイン後の処理に必要なセッショントークンを確認する。
+// 認証に失敗した場合はエラーオブジェクト、成功した場合はnullを返す。
 function requireAuth(token) {
   if (!token) {
     return unauthorized();
@@ -68,6 +80,9 @@ function requireAuth(token) {
   return null;
 }
 
+/* ここから投稿処理 */
+
+// クライアントから送られた投稿内容を検証し、正常なら処理結果を返す。
 function handlePost(payload) {
   const category = String(payload.category || "").trim();
   const title = String(payload.title || "").trim();
@@ -86,6 +101,9 @@ function handlePost(payload) {
   });
 }
 
+/* ここからレスポンス生成 */
+
+// 認証エラー時に共通で返すレスポンス内容。
 function unauthorized() {
   return {
     status: "error",
@@ -93,6 +111,7 @@ function unauthorized() {
   };
 }
 
+// オブジェクトをJSONレスポンスとして返すための共通ヘルパー。
 function json(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))

@@ -1,9 +1,5 @@
 # GAS API
 
-このフォルダには、公開リポジトリに置いてよい Google Apps Script のコードを置きます。
-
-実際のパスワードはこのフォルダ内のコードや README には書かないでください。
-
 ## デプロイ手順
 
 1. Google Apps Script エディタを開く。
