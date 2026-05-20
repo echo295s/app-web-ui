@@ -34,12 +34,42 @@ function redirectToPost() {
   window.location.href = "post.html";
 }
 
-async function postJson(body) {
-  const response = await fetch(requestUrl(), {
-    method: "POST",
-    body: JSON.stringify(body),
+async function requestJson(body) {
+  const callbackName =
+    "jsonp_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+  const url = requestUrl();
+  const script = document.createElement("script");
+
+  url.searchParams.set("callback", callbackName);
+  Object.entries(body).forEach(([key, value]) => {
+    url.searchParams.set(key, value == null ? "" : String(value));
   });
-  return response.json();
+
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      script.remove();
+      delete window[callbackName];
+    };
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("API request timed out"));
+    }, 15000);
+
+    window[callbackName] = (data) => {
+      window.clearTimeout(timeoutId);
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = () => {
+      window.clearTimeout(timeoutId);
+      cleanup();
+      reject(new Error("API request failed"));
+    };
+
+    script.src = url.toString();
+    document.head.appendChild(script);
+  });
 }
 
 if (loginForm) {
@@ -55,7 +85,7 @@ if (loginForm) {
     const password = formData.get("password");
 
     try {
-      const data = await postJson({ action: "login", password });
+      const data = await requestJson({ action: "login", password });
       const token = data.token || data.sessionToken;
 
       if (data.status === "success" && token) {
@@ -97,7 +127,7 @@ if (postForm) {
     };
 
     try {
-      const data = await postJson(body);
+      const data = await requestJson(body);
 
       if (data.status === "success") {
         result.textContent = "成功しました。";
