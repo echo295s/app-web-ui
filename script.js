@@ -329,10 +329,6 @@ if (postForm) {
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
       dataFields.appendChild(createDataFieldRow());
-      const latestInput = dataFields.lastElementChild.querySelector("input");
-      if (latestInput) {
-        latestInput.focus();
-      }
     });
   }
 
