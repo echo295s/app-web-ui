@@ -1,4 +1,4 @@
-# GAS API
+﻿# GAS API
 
 Google Apps Script で動かす、汎用的な生データ保存APIです。
 API側ではデータを加工せず、次の4列だけを保存します。
