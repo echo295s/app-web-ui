@@ -13,8 +13,18 @@ const searchInput = document.querySelector("#search-input");
 const searchTarget = document.querySelector("#search-target");
 const addFieldButton = document.querySelector("#add-field-button");
 const dataFields = document.querySelector("#data-fields");
+const detailForm = document.querySelector("#detail-form");
+const detailDataFields = document.querySelector("#detail-data-fields");
+const detailAddFieldButton = document.querySelector("#detail-add-field-button");
+const detailResult = document.querySelector("#detail-result");
+const detailId = document.querySelector("#detail-id");
+const detailCreated = document.querySelector("#detail-created");
+const deleteButton = document.querySelector("#delete-button");
+const rawDataField = document.querySelector("#raw-data-field");
+const rawDataInput = document.querySelector("#raw-data-input");
 
 let records = [];
+let currentRecord = null;
 
 function requestUrl() {
   if (!API_ENDPOINT_URL) {
@@ -42,6 +52,14 @@ function redirectToLogin() {
 
 function redirectToPost() {
   window.location.href = "post.html";
+}
+
+function detailUrl(id) {
+  return "detail.html?id=" + encodeURIComponent(id);
+}
+
+function getDetailId() {
+  return new URLSearchParams(window.location.search).get("id") || "";
 }
 
 async function requestJson(body) {
@@ -82,7 +100,7 @@ async function requestJson(body) {
   });
 }
 
-function createDataFieldRow() {
+function createDataFieldRow(key = "", value = "", required = true) {
   const row = document.createElement("tr");
   row.className = "data-field-row";
 
@@ -91,7 +109,8 @@ function createDataFieldRow() {
   keyInput.name = "dataKey";
   keyInput.type = "text";
   keyInput.setAttribute("aria-label", "Key");
-  keyInput.required = true;
+  keyInput.required = required;
+  keyInput.value = key;
   keyCell.appendChild(keyInput);
 
   const valueCell = document.createElement("td");
@@ -99,7 +118,8 @@ function createDataFieldRow() {
   valueInput.name = "dataValue";
   valueInput.type = "text";
   valueInput.setAttribute("aria-label", "Value");
-  valueInput.required = true;
+  valueInput.required = required;
+  valueInput.value = value;
   valueCell.appendChild(valueInput);
 
   row.append(keyCell, valueCell);
@@ -138,6 +158,85 @@ function buildPostData() {
   });
 
   return hasField ? JSON.stringify(data) : "";
+}
+
+function buildDataFromFields(fieldsBody) {
+  if (!fieldsBody) {
+    return "";
+  }
+
+  const data = {};
+  let hasField = false;
+
+  fieldsBody.querySelectorAll(".data-field-row").forEach((row) => {
+    const keyInput = row.querySelector('input[name="dataKey"]');
+    const valueInput = row.querySelector('input[name="dataValue"]');
+    const key = String(keyInput ? keyInput.value : "").trim();
+    const value = String(valueInput ? valueInput.value : "").trim();
+
+    if (!key || !value) {
+      return;
+    }
+
+    data[key] = value;
+    hasField = true;
+  });
+
+  return hasField ? JSON.stringify(data) : "";
+}
+
+function parseRawDataObject(rawData) {
+  try {
+    const parsed = JSON.parse(rawData || "{}");
+    const isPlainObject =
+      parsed &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed);
+
+    return isPlainObject ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function populateDataFields(fieldsBody, rawData) {
+  if (!fieldsBody) {
+    return;
+  }
+
+  const parsed = parseRawDataObject(rawData);
+  fieldsBody.innerHTML = "";
+
+  if (!parsed) {
+    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    return;
+  }
+
+  const entries = Object.entries(parsed);
+  if (entries.length === 0) {
+    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    return;
+  }
+
+  entries.forEach(([key, value]) => {
+    const fieldValue =
+      typeof value === "string" ? value : JSON.stringify(value);
+    fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false));
+  });
+}
+
+function setDetailControlsDisabled(disabled) {
+  if (detailForm) {
+    detailForm
+      .querySelectorAll("input, textarea, button")
+      .forEach((control) => {
+        control.disabled = disabled;
+      });
+  }
+
+  if (deleteButton) {
+    deleteButton.disabled = disabled;
+  }
 }
 
 function recordView(record) {
@@ -206,7 +305,15 @@ function renderRecords() {
 
   rows.forEach((record) => {
     const row = document.createElement("tr");
-    [record.id, record.rawData, formatTimestamp(record.timestamp)].forEach((value) => {
+    const idCell = document.createElement("td");
+    const idLink = document.createElement("a");
+    idLink.className = "record-link";
+    idLink.href = detailUrl(record.id);
+    idLink.textContent = record.id || "-";
+    idCell.appendChild(idLink);
+    row.appendChild(idCell);
+
+    [record.rawData, formatTimestamp(record.timestamp)].forEach((value) => {
       const cell = document.createElement("td");
       cell.textContent = value || "-";
       row.appendChild(cell);
@@ -242,6 +349,149 @@ async function loadRecords() {
       data.message === "Unauthorized" ? "認証に失敗しました。" : "一覧の取得に失敗しました。";
   } catch (error) {
     listResult.textContent = error.message;
+  }
+}
+
+async function loadDetail() {
+  if (!detailForm || !detailResult) {
+    return;
+  }
+
+  const id = getDetailId();
+
+  if (!id) {
+    detailResult.textContent = "IDが指定されていません。";
+    setDetailControlsDisabled(true);
+    return;
+  }
+
+  if (detailId) {
+    detailId.textContent = id;
+  }
+
+  detailResult.textContent = "取得中...";
+  setDetailControlsDisabled(true);
+
+  try {
+    const data = await requestJson({
+      action: "read",
+      token: getSessionToken(),
+      id,
+    });
+
+    if (data.status === "success" && data.record) {
+      currentRecord = recordView(data.record);
+      populateDataFields(detailDataFields, currentRecord.rawData);
+
+      if (detailCreated) {
+        detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
+      }
+
+      if (rawDataInput) {
+        rawDataInput.value = currentRecord.rawData;
+      }
+
+      if (rawDataField) {
+        rawDataField.hidden = Boolean(parseRawDataObject(currentRecord.rawData));
+      }
+
+      detailResult.textContent = "取得しました。";
+      setDetailControlsDisabled(false);
+      return;
+    }
+
+    detailResult.textContent =
+      data.message === "Unauthorized" ? "認証に失敗しました。" : "データが見つかりません。";
+  } catch (error) {
+    detailResult.textContent = error.message;
+  }
+}
+
+async function updateDetail() {
+  if (!detailResult || !currentRecord) {
+    return;
+  }
+
+  const rawData = rawDataField && !rawDataField.hidden
+    ? String(rawDataInput ? rawDataInput.value : "").trim()
+    : buildDataFromFields(detailDataFields);
+
+  if (!rawData) {
+    detailResult.textContent = "キーと値を入力してください。";
+    return;
+  }
+
+  detailResult.textContent = "更新中...";
+  setDetailControlsDisabled(true);
+
+  try {
+    const data = await requestJson({
+      action: "update",
+      token: getSessionToken(),
+      id: currentRecord.id,
+      rawData,
+    });
+
+    if (data.status === "success" && data.record) {
+      currentRecord = recordView(data.record);
+      populateDataFields(detailDataFields, currentRecord.rawData);
+
+      if (detailCreated) {
+        detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
+      }
+
+      if (rawDataInput) {
+        rawDataInput.value = currentRecord.rawData;
+      }
+
+      detailResult.textContent = "更新しました。";
+      setDetailControlsDisabled(false);
+      return;
+    }
+
+    detailResult.textContent =
+      data.message === "Unauthorized" ? "認証に失敗しました。" : "更新に失敗しました。";
+  } catch (error) {
+    detailResult.textContent = error.message;
+  } finally {
+    if (currentRecord) {
+      setDetailControlsDisabled(false);
+    }
+  }
+}
+
+async function deleteDetail() {
+  if (!detailResult || !currentRecord) {
+    return;
+  }
+
+  const ok = window.confirm("このデータを削除しますか？");
+  if (!ok) {
+    return;
+  }
+
+  detailResult.textContent = "削除中...";
+  setDetailControlsDisabled(true);
+
+  try {
+    const data = await requestJson({
+      action: "delete",
+      token: getSessionToken(),
+      id: currentRecord.id,
+    });
+
+    if (data.status === "success") {
+      detailResult.textContent = "削除しました。";
+      window.location.href = "post.html";
+      return;
+    }
+
+    detailResult.textContent =
+      data.message === "Unauthorized" ? "認証に失敗しました。" : "削除に失敗しました。";
+    setDetailControlsDisabled(false);
+  } catch (error) {
+    detailResult.textContent = error.message;
+    setDetailControlsDisabled(false);
   }
 }
 
@@ -341,4 +591,27 @@ if (postForm) {
   }
 
   loadRecords();
+}
+
+if (detailForm) {
+  if (!getSessionToken()) {
+    redirectToLogin();
+  }
+
+  detailForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await updateDetail();
+  });
+
+  if (detailAddFieldButton && detailDataFields) {
+    detailAddFieldButton.addEventListener("click", () => {
+      detailDataFields.appendChild(createDataFieldRow("", "", false));
+    });
+  }
+
+  if (deleteButton) {
+    deleteButton.addEventListener("click", deleteDetail);
+  }
+
+  loadDetail();
 }

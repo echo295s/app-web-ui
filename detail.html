@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>データ詳細</title>
+    <link rel="icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="page-header">
+        <h1>データ詳細</h1>
+        <a class="button-link" href="post.html">一覧へ戻る</a>
+      </div>
+
+      <section class="panel" aria-labelledby="detail-heading">
+        <div class="section-header">
+          <h2 id="detail-heading">更新</h2>
+          <div class="button-row">
+            <button class="danger-button" id="delete-button" type="button">削除</button>
+            <button class="submit-button" type="submit" form="detail-form">更新</button>
+          </div>
+        </div>
+
+        <dl class="record-meta">
+          <div>
+            <dt>ID</dt>
+            <dd id="detail-id">-</dd>
+          </div>
+          <div>
+            <dt>Created</dt>
+            <dd id="detail-created">-</dd>
+          </div>
+        </dl>
+
+        <form id="detail-form">
+          <div class="field-group">
+            <table class="data-fields-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody id="detail-data-fields">
+                <tr class="data-field-row">
+                  <td>
+                    <input name="dataKey" type="text" aria-label="Key" required />
+                  </td>
+                  <td>
+                    <input name="dataValue" type="text" aria-label="Value" required />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button id="detail-add-field-button" type="button">＋</button>
+          </div>
+
+          <label id="raw-data-field" hidden>
+            Raw Data
+            <textarea id="raw-data-input" rows="8"></textarea>
+          </label>
+        </form>
+
+        <p id="detail-result">取得中...</p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

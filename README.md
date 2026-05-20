@@ -4,6 +4,7 @@ GitHub Pages で静的フロントエンドを公開するリポジトリです�
 
 - `index.html`: ログインページ
 - `post.html`: 投稿フォーム
+- `detail.html`: データ詳細・更新・削除ページ
 - `script.js`: API 呼び出しと `sessionStorage` によるトークン管理
 - `style.css`: 共通スタイル
 - `gas/`: Google Apps Script API コード
