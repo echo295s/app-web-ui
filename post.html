@@ -11,7 +11,6 @@
     <main>
       <div class="page-header">
         <h1>データ管理</h1>
-        <button id="logout-button" type="button">ログアウト</button>
       </div>
 
       <section class="panel" aria-labelledby="post-heading">
@@ -54,7 +53,7 @@
 
         <form id="search-form" class="tools">
           <label>
-            Search
+            検索
             <input
               id="search-input"
               name="search"
@@ -64,7 +63,7 @@
           </label>
 
           <label>
-            Search target
+            検索対象
             <select id="search-target" name="searchTarget">
               <option value="all">すべて</option>
               <option value="rawData">Data</option>
@@ -92,6 +91,10 @@
           </table>
         </div>
       </section>
+
+      <div class="logout-area">
+        <button id="logout-button" type="button">ログアウト</button>
+      </div>
     </main>
 
     <script src="script.js"></script>
