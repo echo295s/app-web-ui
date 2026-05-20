@@ -17,15 +17,27 @@
       <section class="panel" aria-labelledby="post-heading">
         <h2 id="post-heading">新規登録</h2>
         <form id="post-form">
-          <label>
-            Data
-            <textarea
-              name="rawData"
-              rows="8"
-              placeholder='{"key":"value"}'
-              required
-            ></textarea>
-          </label>
+          <div class="field-group">
+            <table class="data-fields-table">
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody id="data-fields">
+                <tr class="data-field-row">
+                  <td>
+                    <input name="dataKey" type="text" aria-label="Key" required />
+                  </td>
+                  <td>
+                    <input name="dataValue" type="text" aria-label="Value" required />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button id="add-field-button" type="button">＋</button>
+          </div>
 
           <button type="submit">送信</button>
         </form>
@@ -57,16 +69,6 @@
               <option value="rawData">Data</option>
               <option value="id">ID</option>
               <option value="timestamp">Timestamp</option>
-            </select>
-          </label>
-
-          <label>
-            Mock filter
-            <select id="filter-target" name="filterTarget">
-              <option value="all">すべて</option>
-              <option value="json">JSON形式</option>
-              <option value="text">テキスト形式</option>
-              <option value="hasId">IDあり</option>
             </select>
           </label>
         </form>

@@ -11,7 +11,8 @@ const logoutButton = document.querySelector("#logout-button");
 const refreshButton = document.querySelector("#refresh-button");
 const searchInput = document.querySelector("#search-input");
 const searchTarget = document.querySelector("#search-target");
-const filterTarget = document.querySelector("#filter-target");
+const addFieldButton = document.querySelector("#add-field-button");
+const dataFields = document.querySelector("#data-fields");
 
 let records = [];
 
@@ -81,21 +82,62 @@ async function requestJson(body) {
   });
 }
 
-function buildPostData(formData) {
-  return String(formData.get("rawData") || "").trim();
+function createDataFieldRow() {
+  const row = document.createElement("tr");
+  row.className = "data-field-row";
+
+  const keyCell = document.createElement("td");
+  const keyInput = document.createElement("input");
+  keyInput.name = "dataKey";
+  keyInput.type = "text";
+  keyInput.setAttribute("aria-label", "Key");
+  keyInput.required = true;
+  keyCell.appendChild(keyInput);
+
+  const valueCell = document.createElement("td");
+  const valueInput = document.createElement("input");
+  valueInput.name = "dataValue";
+  valueInput.type = "text";
+  valueInput.setAttribute("aria-label", "Value");
+  valueInput.required = true;
+  valueCell.appendChild(valueInput);
+
+  row.append(keyCell, valueCell);
+  return row;
 }
 
-function isJsonRawData(rawData) {
-  if (!rawData) {
-    return false;
+function resetDataFields() {
+  if (!dataFields) {
+    return;
   }
 
-  try {
-    JSON.parse(rawData);
-    return true;
-  } catch (error) {
-    return false;
+  dataFields.innerHTML = "";
+  dataFields.appendChild(createDataFieldRow());
+}
+
+function buildPostData() {
+  if (!dataFields) {
+    return "";
   }
+
+  const data = {};
+  let hasField = false;
+
+  dataFields.querySelectorAll(".data-field-row").forEach((row) => {
+    const keyInput = row.querySelector('input[name="dataKey"]');
+    const valueInput = row.querySelector('input[name="dataValue"]');
+    const key = String(keyInput ? keyInput.value : "").trim();
+    const value = String(valueInput ? valueInput.value : "").trim();
+
+    if (!key || !value) {
+      return;
+    }
+
+    data[key] = value;
+    hasField = true;
+  });
+
+  return hasField ? JSON.stringify(data) : "";
 }
 
 function recordView(record) {
@@ -104,7 +146,6 @@ function recordView(record) {
     timestamp: record.timestamp || "",
     deleted: Boolean(record.deleted),
     rawData: record.rawData || "",
-    isJson: isJsonRawData(record.rawData),
   };
 }
 
@@ -141,30 +182,12 @@ function matchesSearch(record) {
   return fields.some((value) => String(value || "").toLowerCase().includes(keyword));
 }
 
-function matchesMockFilter(record) {
-  const target = filterTarget ? filterTarget.value : "all";
-
-  if (target === "json") {
-    return record.isJson;
-  }
-
-  if (target === "text") {
-    return !record.isJson;
-  }
-
-  if (target === "hasId") {
-    return record.id.trim() !== "";
-  }
-
-  return true;
-}
-
 function renderRecords() {
   if (!recordsBody) {
     return;
   }
 
-  const rows = records.map(recordView).filter(matchesSearch).filter(matchesMockFilter);
+  const rows = records.map(recordView).filter(matchesSearch);
   recordsBody.innerHTML = "";
 
   if (rows.length === 0) {
@@ -268,11 +291,10 @@ if (postForm) {
     event.preventDefault();
     result.textContent = "送信中...";
 
-    const formData = new FormData(postForm);
-    const rawData = buildPostData(formData);
+    const rawData = buildPostData();
 
     if (!rawData) {
-      result.textContent = "データを入力してください。";
+      result.textContent = "キーと値を入力してください。";
       return;
     }
 
@@ -288,6 +310,7 @@ if (postForm) {
       if (data.status === "success") {
         result.textContent = "保存しました。";
         postForm.reset();
+        resetDataFields();
         await loadRecords();
         return;
       }
@@ -301,6 +324,16 @@ if (postForm) {
 
   if (refreshButton) {
     refreshButton.addEventListener("click", loadRecords);
+  }
+
+  if (addFieldButton && dataFields) {
+    addFieldButton.addEventListener("click", () => {
+      dataFields.appendChild(createDataFieldRow());
+      const latestInput = dataFields.lastElementChild.querySelector("input");
+      if (latestInput) {
+        latestInput.focus();
+      }
+    });
   }
 
   if (searchForm) {

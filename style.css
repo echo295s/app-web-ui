@@ -24,6 +24,7 @@ label {
 input,
 textarea,
 button {
+  box-sizing: border-box;
   border: 1px solid #444;
   border-radius: 4px;
   padding: 10px;
@@ -32,10 +33,22 @@ button {
   font: inherit;
 }
 
+input,
+textarea,
+select {
+  width: 100%;
+  min-width: 0;
+}
+
 button {
   cursor: pointer;
   background: #eee;
   color: #111;
+}
+
+.field-group {
+  display: grid;
+  gap: 10px;
 }
 
 .page-header,
@@ -66,7 +79,7 @@ h2 {
 }
 
 .tools {
-  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(160px, 220px));
+  grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px);
   align-items: end;
 }
 
@@ -82,6 +95,11 @@ select {
 #logout-button {
   background: #1b1b1b;
   color: #eee;
+}
+
+#add-field-button {
+  justify-self: stretch;
+  padding: 8px 12px;
 }
 
 #result,
@@ -119,6 +137,42 @@ td {
 
 td:nth-child(2) {
   white-space: pre-wrap;
+}
+
+.data-fields-table {
+  width: 100%;
+  min-width: 0;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  table-layout: fixed;
+}
+
+.data-fields-table th,
+.data-fields-table td {
+  padding: 0;
+  border: 0;
+  text-align: left;
+  vertical-align: middle;
+  white-space: normal;
+}
+
+.data-fields-table th {
+  padding-bottom: 4px;
+  color: #bbb;
+  font-weight: 600;
+}
+
+.data-fields-table th + th,
+.data-fields-table td + td {
+  padding-left: 10px;
+}
+
+.data-fields-table th:first-child {
+  width: 40%;
+}
+
+.data-fields-table td:nth-child(2) {
+  white-space: normal;
 }
 
 @media (max-width: 720px) {
