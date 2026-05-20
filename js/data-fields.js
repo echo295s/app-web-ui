@@ -1,0 +1,99 @@
+export function createDataFieldRow(key = "", value = "", required = true) {
+  const row = document.createElement("tr");
+  row.className = "data-field-row";
+
+  const keyCell = document.createElement("td");
+  const keyInput = document.createElement("input");
+  keyInput.name = "dataKey";
+  keyInput.type = "text";
+  keyInput.setAttribute("aria-label", "Key");
+  keyInput.required = required;
+  keyInput.value = key;
+  keyCell.appendChild(keyInput);
+
+  const valueCell = document.createElement("td");
+  const valueInput = document.createElement("input");
+  valueInput.name = "dataValue";
+  valueInput.type = "text";
+  valueInput.setAttribute("aria-label", "Value");
+  valueInput.required = required;
+  valueInput.value = value;
+  valueCell.appendChild(valueInput);
+
+  row.append(keyCell, valueCell);
+  return row;
+}
+
+export function resetDataFields(fieldsBody) {
+  if (!fieldsBody) {
+    return;
+  }
+
+  fieldsBody.innerHTML = "";
+  fieldsBody.appendChild(createDataFieldRow());
+}
+
+export function buildDataFromFields(fieldsBody) {
+  if (!fieldsBody) {
+    return "";
+  }
+
+  const data = {};
+  let hasField = false;
+
+  fieldsBody.querySelectorAll(".data-field-row").forEach((row) => {
+    const keyInput = row.querySelector('input[name="dataKey"]');
+    const valueInput = row.querySelector('input[name="dataValue"]');
+    const key = String(keyInput ? keyInput.value : "").trim();
+    const value = String(valueInput ? valueInput.value : "").trim();
+
+    if (!key || !value) {
+      return;
+    }
+
+    data[key] = value;
+    hasField = true;
+  });
+
+  return hasField ? JSON.stringify(data) : "";
+}
+
+export function parseRawDataObject(rawData) {
+  try {
+    const parsed = JSON.parse(rawData || "{}");
+    const isPlainObject =
+      parsed &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed);
+
+    return isPlainObject ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+export function populateDataFields(fieldsBody, rawData) {
+  if (!fieldsBody) {
+    return;
+  }
+
+  const parsed = parseRawDataObject(rawData);
+  fieldsBody.innerHTML = "";
+
+  if (!parsed) {
+    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    return;
+  }
+
+  const entries = Object.entries(parsed);
+  if (entries.length === 0) {
+    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    return;
+  }
+
+  entries.forEach(([key, value]) => {
+    const fieldValue =
+      typeof value === "string" ? value : JSON.stringify(value);
+    fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false));
+  });
+}
