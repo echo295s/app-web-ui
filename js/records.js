@@ -1,4 +1,4 @@
-import { detailUrl } from "./navigation.js";
+﻿import { detailUrl } from "./navigation.js";
 
 export function recordView(record) {
   return {
