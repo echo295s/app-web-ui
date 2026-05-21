@@ -25,6 +25,7 @@
                 <tr>
                   <th>Key</th>
                   <th>Value</th>
+                  <th class="data-field-action-heading" aria-label="削除"></th>
                 </tr>
               </thead>
               <tbody id="data-fields">
@@ -34,6 +35,17 @@
                   </td>
                   <td>
                     <input name="dataValue" type="text" aria-label="Value" required />
+                  </td>
+                  <td class="data-field-action-cell">
+                    <button
+                      class="field-row-delete-button"
+                      type="button"
+                      data-delete-field-row
+                      aria-label="行を削除"
+                      title="行を削除"
+                    >
+                      <img src="./assets/trash-can-solid-full.svg" alt="" aria-hidden="true" />
+                    </button>
                   </td>
                 </tr>
               </tbody>

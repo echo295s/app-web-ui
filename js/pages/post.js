@@ -1,4 +1,4 @@
-import { requestJson } from "../api.js";
+﻿import { requestJson } from "../api.js";
 import { buildDataFromFields, createDataFieldRow, resetDataFields } from "../data-fields.js";
 import { redirectToLogin } from "../navigation.js";
 import { clearSessionToken, getSessionToken } from "../session.js";
@@ -93,7 +93,7 @@ export function initPostPage() {
       if (data.status === "success") {
         result.textContent = "保存しました。";
         postForm.reset();
-        resetDataFields(dataFields);
+        resetDataFields(dataFields, { removable: true });
         await loadRecords();
         return;
       }
@@ -111,7 +111,27 @@ export function initPostPage() {
 
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
-      dataFields.appendChild(createDataFieldRow());
+      dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
+    });
+  }
+
+  if (dataFields) {
+    dataFields.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+
+      const deleteButton = target.closest("[data-delete-field-row]");
+      if (!deleteButton) {
+        return;
+      }
+
+      deleteButton.closest(".data-field-row")?.remove();
+
+      if (!dataFields.querySelector(".data-field-row")) {
+        dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
+      }
     });
   }
 

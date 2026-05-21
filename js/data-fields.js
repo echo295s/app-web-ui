@@ -1,4 +1,5 @@
-export function createDataFieldRow(key = "", value = "", required = true) {
+﻿export function createDataFieldRow(key = "", value = "", required = true, options = {}) {
+  const { removable = false } = options;
   const row = document.createElement("tr");
   row.className = "data-field-row";
 
@@ -20,17 +21,39 @@ export function createDataFieldRow(key = "", value = "", required = true) {
   valueInput.value = value;
   valueCell.appendChild(valueInput);
 
-  row.append(keyCell, valueCell);
+  if (!removable) {
+    row.append(keyCell, valueCell);
+    return row;
+  }
+
+  const actionCell = document.createElement("td");
+  actionCell.className = "data-field-action-cell";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "field-row-delete-button";
+  deleteButton.type = "button";
+  deleteButton.dataset.deleteFieldRow = "";
+  deleteButton.setAttribute("aria-label", "行を削除");
+  deleteButton.title = "行を削除";
+
+  const deleteIcon = document.createElement("img");
+  deleteIcon.src = "./assets/trash-can-solid-full.svg";
+  deleteIcon.alt = "";
+  deleteIcon.setAttribute("aria-hidden", "true");
+
+  deleteButton.appendChild(deleteIcon);
+  actionCell.appendChild(deleteButton);
+  row.append(keyCell, valueCell, actionCell);
   return row;
 }
 
-export function resetDataFields(fieldsBody) {
+export function resetDataFields(fieldsBody, options = {}) {
   if (!fieldsBody) {
     return;
   }
 
   fieldsBody.innerHTML = "";
-  fieldsBody.appendChild(createDataFieldRow());
+  fieldsBody.appendChild(createDataFieldRow("", "", true, options));
 }
 
 export function buildDataFromFields(fieldsBody) {

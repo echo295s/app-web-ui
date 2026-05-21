@@ -294,8 +294,36 @@ td:nth-child(2) {
   width: 40%;
 }
 
+.data-field-action-heading,
+.data-field-action-cell {
+  width: 44px;
+}
+
 .data-fields-table td:nth-child(2) {
   white-space: normal;
+}
+
+.field-row-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-color: #444;
+  background: #222;
+}
+
+.field-row-delete-button:hover:not(:disabled) {
+  background: #2a2a2a;
+}
+
+.field-row-delete-button img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  filter: invert(100%);
+  pointer-events: none;
 }
 
 @media (max-width: 720px) {
