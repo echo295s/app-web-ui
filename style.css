@@ -296,7 +296,7 @@ td:nth-child(2) {
 
 .data-field-action-heading,
 .data-field-action-cell {
-  width: 44px;
+  width: 46px;
 }
 
 .data-fields-table td:nth-child(2) {
@@ -307,8 +307,8 @@ td:nth-child(2) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   padding: 0;
   border-color: #444;
   background: #222;
