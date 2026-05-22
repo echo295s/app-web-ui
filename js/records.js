@@ -26,6 +26,10 @@ export function formatTimestamp(value) {
   }).format(date);
 }
 
+export function displayRecordId(id) {
+  return id ? String(id).slice(0, 8) : "-";
+}
+
 export function renderRecords({
   records,
   recordsBody,
@@ -76,7 +80,7 @@ export function renderRecords({
     const idLink = document.createElement("a");
     idLink.className = "record-link";
     idLink.href = detailUrl(record.id);
-    idLink.textContent = record.id || "-";
+    idLink.textContent = displayRecordId(record.id);
     idCell.appendChild(idLink);
     row.appendChild(idCell);
 
