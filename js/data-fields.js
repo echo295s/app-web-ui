@@ -96,7 +96,7 @@ export function buildDataFromFields(fieldsBody) {
     const keyInput = row.querySelector('input[name="dataKey"]');
     const valueInput = row.querySelector('[name="dataValue"]');
     const key = String(keyInput ? keyInput.value : "").trim();
-    const value = String(valueInput ? valueInput.value : "").trim();
+    const value = String(valueInput ? valueInput.value : "");
 
     if (!key) {
       return;

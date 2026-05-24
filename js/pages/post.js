@@ -5,6 +5,7 @@ import {
   replaceDataFields,
   resetDataFields,
 } from "../data-fields.js";
+import { handleUnauthorized } from "../auth.js";
 import { redirectToLogin } from "../navigation.js";
 import { clearSessionToken, getSessionToken } from "../session.js";
 import { renderRecords } from "../records.js";
@@ -23,8 +24,14 @@ export function initPostPage() {
   const dataFields = document.querySelector("#data-fields");
   const jsonPresetTab = document.querySelector("#json-preset-tab");
   const articlePresetTab = document.querySelector("#article-preset-tab");
+  const submitButton = document.querySelector(
+    'button[form="post-form"][type="submit"]',
+  );
 
   let records = [];
+  let isLoadingRecords = false;
+  let isSubmitting = false;
+  let latestRecordsRequestId = 0;
 
   const setActivePreset = (activeTab) => {
     const isArticlePreset = activeTab === articlePresetTab;
@@ -54,12 +61,24 @@ export function initPostPage() {
     });
   };
 
-  const loadRecords = async () => {
+  const loadRecords = async (options = {}) => {
+    const { force = false } = options;
+
     if (!recordsBody || !listResult) {
       return;
     }
 
+    if (isLoadingRecords && !force) {
+      return;
+    }
+
+    const requestId = latestRecordsRequestId + 1;
+    latestRecordsRequestId = requestId;
+    isLoadingRecords = true;
     listResult.textContent = "取得中...";
+    if (refreshButton) {
+      refreshButton.disabled = true;
+    }
 
     try {
       const data = await requestJson({
@@ -67,16 +86,35 @@ export function initPostPage() {
         token: getSessionToken(),
       });
 
+      if (requestId !== latestRecordsRequestId) {
+        return;
+      }
+
       if (data.status === "success") {
         records = Array.isArray(data.records) ? data.records : [];
         renderCurrentRecords();
         return;
       }
 
-      listResult.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "一覧の取得に失敗しました。";
+      if (handleUnauthorized(data)) {
+        return;
+      }
+
+      listResult.textContent = "一覧の取得に失敗しました。";
     } catch (error) {
+      if (requestId !== latestRecordsRequestId) {
+        return;
+      }
+
       listResult.textContent = error.message;
+    } finally {
+      if (requestId === latestRecordsRequestId) {
+        isLoadingRecords = false;
+      }
+
+      if (refreshButton && requestId === latestRecordsRequestId) {
+        refreshButton.disabled = false;
+      }
     }
   };
 
@@ -86,6 +124,7 @@ export function initPostPage() {
 
   if (!getSessionToken()) {
     redirectToLogin();
+    return;
   }
 
   if (logoutButton) {
@@ -97,12 +136,26 @@ export function initPostPage() {
 
   postForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
+    isSubmitting = true;
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+
     result.textContent = "送信中...";
 
     const rawData = buildDataFromFields(dataFields);
 
     if (!rawData) {
       result.textContent = "キーを入力してください。";
+      isSubmitting = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
       return;
     }
 
@@ -120,19 +173,27 @@ export function initPostPage() {
         postForm.reset();
         resetDataFields(dataFields, { removable: true, valueRequired: false });
         setActivePreset(jsonPresetTab);
-        await loadRecords();
+        await loadRecords({ force: true });
         return;
       }
 
-      result.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "エラーです。";
+      if (handleUnauthorized(data)) {
+        return;
+      }
+
+      result.textContent = "エラーです。";
     } catch (error) {
       result.textContent = error.message;
+    } finally {
+      isSubmitting = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     }
   });
 
   if (refreshButton) {
-    refreshButton.addEventListener("click", loadRecords);
+    refreshButton.addEventListener("click", () => loadRecords());
   }
 
   if (addFieldButton && dataFields) {

@@ -6,6 +6,7 @@ import {
   populateDataFields,
   populateDataFieldsFromObject,
 } from "../data-fields.js";
+import { handleUnauthorized } from "../auth.js";
 import { getDetailId, redirectToLogin } from "../navigation.js";
 import { getSessionToken } from "../session.js";
 import { formatTimestamp, recordView } from "../records.js";
@@ -18,6 +19,9 @@ export function initDetailPage() {
   const detailId = document.querySelector("#detail-id");
   const detailCreated = document.querySelector("#detail-created");
   const deleteButton = document.querySelector("#delete-button");
+  const detailSubmitButton = document.querySelector(
+    'button[form="detail-form"][type="submit"]',
+  );
   const rawDataField = document.querySelector("#raw-data-field");
   const rawDataInput = document.querySelector("#raw-data-input");
   const articleBodyField = document.querySelector("#article-body-field");
@@ -26,6 +30,8 @@ export function initDetailPage() {
   let currentRecord = null;
   let currentParsedData = null;
   let isCurrentArticle = false;
+  let isUpdating = false;
+  let isDeleting = false;
 
   const setDetailControlsDisabled = (disabled) => {
     if (detailForm) {
@@ -38,6 +44,10 @@ export function initDetailPage() {
 
     if (deleteButton) {
       deleteButton.disabled = disabled;
+    }
+
+    if (detailSubmitButton) {
+      detailSubmitButton.disabled = disabled;
     }
   };
 
@@ -120,8 +130,11 @@ export function initDetailPage() {
         return;
       }
 
-      detailResult.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "データが見つかりません。";
+      if (handleUnauthorized(data)) {
+        return;
+      }
+
+      detailResult.textContent = "データが見つかりません。";
     } catch (error) {
       detailResult.textContent = error.message;
     }
@@ -129,6 +142,10 @@ export function initDetailPage() {
 
   const updateDetail = async () => {
     if (!detailResult || !currentRecord) {
+      return;
+    }
+
+    if (isUpdating) {
       return;
     }
 
@@ -154,6 +171,7 @@ export function initDetailPage() {
     }
 
     detailResult.textContent = "更新中...";
+    isUpdating = true;
     setDetailControlsDisabled(true);
 
     try {
@@ -181,11 +199,15 @@ export function initDetailPage() {
         return;
       }
 
-      detailResult.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "更新に失敗しました。";
+      if (handleUnauthorized(data)) {
+        return;
+      }
+
+      detailResult.textContent = "更新に失敗しました。";
     } catch (error) {
       detailResult.textContent = error.message;
     } finally {
+      isUpdating = false;
       if (currentRecord) {
         setDetailControlsDisabled(false);
       }
@@ -197,12 +219,17 @@ export function initDetailPage() {
       return;
     }
 
+    if (isDeleting) {
+      return;
+    }
+
     const ok = window.confirm("このデータを削除しますか？");
     if (!ok) {
       return;
     }
 
     detailResult.textContent = "削除中...";
+    isDeleting = true;
     setDetailControlsDisabled(true);
 
     try {
@@ -218,12 +245,17 @@ export function initDetailPage() {
         return;
       }
 
-      detailResult.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "削除に失敗しました。";
+      if (handleUnauthorized(data)) {
+        return;
+      }
+
+      detailResult.textContent = "削除に失敗しました。";
       setDetailControlsDisabled(false);
     } catch (error) {
       detailResult.textContent = error.message;
       setDetailControlsDisabled(false);
+    } finally {
+      isDeleting = false;
     }
   };
 
@@ -233,6 +265,7 @@ export function initDetailPage() {
 
   if (!getSessionToken()) {
     redirectToLogin();
+    return;
   }
 
   detailForm.addEventListener("submit", async (event) => {
