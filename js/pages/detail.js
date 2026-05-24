@@ -17,7 +17,7 @@ export function initDetailPage() {
   const detailAddFieldButton = document.querySelector("#detail-add-field-button");
   const detailResult = document.querySelector("#detail-result");
   const detailId = document.querySelector("#detail-id");
-  const detailCreated = document.querySelector("#detail-created");
+  const detailUpdated = document.querySelector("#detail-updated");
   const deleteButton = document.querySelector("#delete-button");
   const detailFieldGroup = detailDataFields?.closest(".field-group");
   const detailSubmitButton = document.querySelector(
@@ -132,8 +132,8 @@ export function initDetailPage() {
         currentRecord = recordView(data.record);
         renderDetailFields();
 
-        if (detailCreated) {
-          detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
+        if (detailUpdated) {
+          detailUpdated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
         }
 
         if (rawDataInput) {
@@ -211,8 +211,8 @@ export function initDetailPage() {
         currentRecord = recordView(data.record);
         renderDetailFields();
 
-        if (detailCreated) {
-          detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
+        if (detailUpdated) {
+          detailUpdated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
         }
 
         if (rawDataInput) {
