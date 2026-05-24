@@ -19,6 +19,7 @@ export function initDetailPage() {
   const detailId = document.querySelector("#detail-id");
   const detailCreated = document.querySelector("#detail-created");
   const deleteButton = document.querySelector("#delete-button");
+  const detailFieldGroup = detailDataFields?.closest(".field-group");
   const detailSubmitButton = document.querySelector(
     'button[form="detail-form"][type="submit"]',
   );
@@ -53,6 +54,18 @@ export function initDetailPage() {
 
   const isArticleData = (data) => data?.type === "article";
 
+  const syncStructuredEditor = () => {
+    const canEditStructuredData = Boolean(currentParsedData);
+
+    if (detailFieldGroup) {
+      detailFieldGroup.hidden = !canEditStructuredData;
+    }
+
+    if (detailSubmitButton) {
+      detailSubmitButton.disabled = !canEditStructuredData;
+    }
+  };
+
   const renderDetailFields = () => {
     currentParsedData = parseRawDataObject(currentRecord?.rawData);
     isCurrentArticle = isArticleData(currentParsedData);
@@ -63,7 +76,7 @@ export function initDetailPage() {
         keyReadonly: true,
         readonlyValueKeys: ["type"],
       });
-    } else {
+    } else if (currentParsedData) {
       populateDataFields(detailDataFields, currentRecord.rawData);
     }
 
@@ -84,6 +97,8 @@ export function initDetailPage() {
     if (rawDataField) {
       rawDataField.hidden = Boolean(currentParsedData);
     }
+
+    syncStructuredEditor();
   };
 
   const loadDetail = async () => {
@@ -127,6 +142,7 @@ export function initDetailPage() {
 
         detailResult.textContent = "取得しました。";
         setDetailControlsDisabled(false);
+        syncStructuredEditor();
         return;
       }
 
@@ -151,18 +167,27 @@ export function initDetailPage() {
 
     let rawData = "";
 
-    if (isCurrentArticle && currentParsedData) {
+    if (!currentParsedData) {
+      detailResult.textContent = "JSONオブジェクト以外の生データは編集できません。";
+      return;
+    }
+
+    if (isCurrentArticle) {
       const updatedArticle = {
         ...currentParsedData,
-        ...JSON.parse(buildDataFromFields(detailDataFields) || "{}"),
+        ...JSON.parse(
+          buildDataFromFields(detailDataFields, {
+            sourceData: currentParsedData,
+          }) || "{}",
+        ),
         type: "article",
         body: String(articleBodyInput ? articleBodyInput.value : ""),
       };
       rawData = JSON.stringify(updatedArticle);
     } else {
-      rawData = rawDataField && !rawDataField.hidden
-        ? String(rawDataInput ? rawDataInput.value : "").trim()
-        : buildDataFromFields(detailDataFields);
+      rawData = buildDataFromFields(detailDataFields, {
+        sourceData: currentParsedData,
+      });
     }
 
     if (!rawData) {
@@ -196,6 +221,7 @@ export function initDetailPage() {
 
         detailResult.textContent = "更新しました。";
         setDetailControlsDisabled(false);
+        syncStructuredEditor();
         return;
       }
 
@@ -210,6 +236,7 @@ export function initDetailPage() {
       isUpdating = false;
       if (currentRecord) {
         setDetailControlsDisabled(false);
+        syncStructuredEditor();
       }
     }
   };
@@ -251,9 +278,11 @@ export function initDetailPage() {
 
       detailResult.textContent = "削除に失敗しました。";
       setDetailControlsDisabled(false);
+      syncStructuredEditor();
     } catch (error) {
       detailResult.textContent = error.message;
       setDetailControlsDisabled(false);
+      syncStructuredEditor();
     } finally {
       isDeleting = false;
     }

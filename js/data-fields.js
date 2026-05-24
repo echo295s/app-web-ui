@@ -84,11 +84,32 @@ export function replaceDataFields(fieldsBody, fields, options = {}) {
   });
 }
 
-export function buildDataFromFields(fieldsBody) {
+function fieldValueToString(value) {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function buildValueFromField(value, sourceValue, hasSourceValue) {
+  if (!hasSourceValue || typeof sourceValue === "string") {
+    return value;
+  }
+
+  if (value === fieldValueToString(sourceValue)) {
+    return sourceValue;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return value;
+  }
+}
+
+export function buildDataFromFields(fieldsBody, options = {}) {
   if (!fieldsBody) {
     return "";
   }
 
+  const { sourceData = null } = options;
   const data = {};
   let hasField = false;
 
@@ -102,7 +123,15 @@ export function buildDataFromFields(fieldsBody) {
       return;
     }
 
-    data[key] = value;
+    const hasSourceValue = Boolean(
+      sourceData &&
+        Object.prototype.hasOwnProperty.call(sourceData, key),
+    );
+    data[key] = buildValueFromField(
+      value,
+      hasSourceValue ? sourceData[key] : undefined,
+      hasSourceValue,
+    );
     hasField = true;
   });
 
@@ -143,8 +172,7 @@ export function populateDataFields(fieldsBody, rawData) {
   }
 
   entries.forEach(([key, value]) => {
-    const fieldValue =
-      typeof value === "string" ? value : JSON.stringify(value);
+    const fieldValue = fieldValueToString(value);
     fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false));
   });
 }
@@ -170,8 +198,7 @@ export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
   }
 
   entries.forEach(([key, value]) => {
-    const fieldValue =
-      typeof value === "string" ? value : JSON.stringify(value);
+    const fieldValue = fieldValueToString(value);
     fieldsBody.appendChild(
       createDataFieldRow(key, fieldValue, false, {
         keyReadonly,
