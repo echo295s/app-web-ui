@@ -45,6 +45,11 @@ select {
   min-width: 0;
 }
 
+input[readonly] {
+  color: #bbb;
+  background: #181818;
+}
+
 a {
   color: #93c5fd;
 }
@@ -298,7 +303,7 @@ td:nth-child(2) {
   padding: 0;
   border: 0;
   text-align: left;
-  vertical-align: middle;
+  vertical-align: top;
   white-space: normal;
 }
 

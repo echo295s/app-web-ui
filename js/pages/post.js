@@ -30,6 +30,10 @@ export function initPostPage() {
     [jsonPresetButton, articlePresetButton].forEach((button) => {
       button?.classList.toggle("active", button === activeButton);
     });
+
+    if (addFieldButton) {
+      addFieldButton.disabled = activeButton === articlePresetButton;
+    }
   };
 
   const renderCurrentRecords = () => {
@@ -146,7 +150,7 @@ export function initPostPage() {
           { key: "title", value: "" },
           { key: "body", value: "", multiline: true },
         ],
-        { removable: true },
+        { keyReadonly: true },
       );
       setActivePreset(articlePresetButton);
     });

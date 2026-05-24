@@ -1,5 +1,5 @@
 ﻿export function createDataFieldRow(key = "", value = "", required = true, options = {}) {
-  const { removable = false, multiline = false } = options;
+  const { removable = false, multiline = false, keyReadonly = false } = options;
   const row = document.createElement("tr");
   row.className = "data-field-row";
 
@@ -9,6 +9,7 @@
   keyInput.type = "text";
   keyInput.setAttribute("aria-label", "Key");
   keyInput.required = required;
+  keyInput.readOnly = keyReadonly;
   keyInput.value = key;
   keyCell.appendChild(keyInput);
 
