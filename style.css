@@ -38,6 +38,11 @@ textarea {
   resize: vertical;
 }
 
+.article-body-input {
+  min-height: 320px;
+  line-height: 1.7;
+}
+
 input,
 textarea,
 select {
@@ -45,7 +50,8 @@ select {
   min-width: 0;
 }
 
-input[readonly] {
+input[readonly],
+textarea[readonly] {
   color: #bbb;
   background: #181818;
 }

@@ -4,6 +4,7 @@ import {
   createDataFieldRow,
   parseRawDataObject,
   populateDataFields,
+  populateDataFieldsFromObject,
 } from "../data-fields.js";
 import { getDetailId, redirectToLogin } from "../navigation.js";
 import { getSessionToken } from "../session.js";
@@ -19,8 +20,12 @@ export function initDetailPage() {
   const deleteButton = document.querySelector("#delete-button");
   const rawDataField = document.querySelector("#raw-data-field");
   const rawDataInput = document.querySelector("#raw-data-input");
+  const articleBodyField = document.querySelector("#article-body-field");
+  const articleBodyInput = document.querySelector("#article-body-input");
 
   let currentRecord = null;
+  let currentParsedData = null;
+  let isCurrentArticle = false;
 
   const setDetailControlsDisabled = (disabled) => {
     if (detailForm) {
@@ -33,6 +38,41 @@ export function initDetailPage() {
 
     if (deleteButton) {
       deleteButton.disabled = disabled;
+    }
+  };
+
+  const isArticleData = (data) => data?.type === "article";
+
+  const renderDetailFields = () => {
+    currentParsedData = parseRawDataObject(currentRecord?.rawData);
+    isCurrentArticle = isArticleData(currentParsedData);
+
+    if (isCurrentArticle) {
+      populateDataFieldsFromObject(detailDataFields, currentParsedData, {
+        excludeKeys: ["body"],
+        keyReadonly: true,
+        readonlyValueKeys: ["type"],
+      });
+    } else {
+      populateDataFields(detailDataFields, currentRecord.rawData);
+    }
+
+    if (detailAddFieldButton) {
+      detailAddFieldButton.hidden = isCurrentArticle;
+    }
+
+    if (articleBodyField) {
+      articleBodyField.hidden = !isCurrentArticle;
+    }
+
+    if (articleBodyInput) {
+      articleBodyInput.value = isCurrentArticle
+        ? String(currentParsedData.body ?? "")
+        : "";
+    }
+
+    if (rawDataField) {
+      rawDataField.hidden = Boolean(currentParsedData);
     }
   };
 
@@ -65,7 +105,7 @@ export function initDetailPage() {
 
       if (data.status === "success" && data.record) {
         currentRecord = recordView(data.record);
-        populateDataFields(detailDataFields, currentRecord.rawData);
+        renderDetailFields();
 
         if (detailCreated) {
           detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";
@@ -73,10 +113,6 @@ export function initDetailPage() {
 
         if (rawDataInput) {
           rawDataInput.value = currentRecord.rawData;
-        }
-
-        if (rawDataField) {
-          rawDataField.hidden = Boolean(parseRawDataObject(currentRecord.rawData));
         }
 
         detailResult.textContent = "取得しました。";
@@ -96,9 +132,21 @@ export function initDetailPage() {
       return;
     }
 
-    const rawData = rawDataField && !rawDataField.hidden
-      ? String(rawDataInput ? rawDataInput.value : "").trim()
-      : buildDataFromFields(detailDataFields);
+    let rawData = "";
+
+    if (isCurrentArticle && currentParsedData) {
+      const updatedArticle = {
+        ...currentParsedData,
+        ...JSON.parse(buildDataFromFields(detailDataFields) || "{}"),
+        type: "article",
+        body: String(articleBodyInput ? articleBodyInput.value : ""),
+      };
+      rawData = JSON.stringify(updatedArticle);
+    } else {
+      rawData = rawDataField && !rawDataField.hidden
+        ? String(rawDataInput ? rawDataInput.value : "").trim()
+        : buildDataFromFields(detailDataFields);
+    }
 
     if (!rawData) {
       detailResult.textContent = "キーと値を入力してください。";
@@ -118,7 +166,7 @@ export function initDetailPage() {
 
       if (data.status === "success" && data.record) {
         currentRecord = recordView(data.record);
-        populateDataFields(detailDataFields, currentRecord.rawData);
+        renderDetailFields();
 
         if (detailCreated) {
           detailCreated.textContent = formatTimestamp(currentRecord.timestamp) || "-";

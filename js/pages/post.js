@@ -156,7 +156,7 @@ export function initPostPage() {
       replaceDataFields(
         dataFields,
         [
-          { key: "type", value: "article" },
+          { key: "type", value: "article", valueReadonly: true },
           { key: "title", value: "" },
           { key: "body", value: "", multiline: true },
         ],

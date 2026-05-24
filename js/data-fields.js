@@ -3,6 +3,7 @@
     removable = false,
     multiline = false,
     keyReadonly = false,
+    valueReadonly = false,
     valueRequired = required,
   } = options;
   const row = document.createElement("tr");
@@ -26,6 +27,7 @@
   }
   valueInput.setAttribute("aria-label", "Value");
   valueInput.required = valueRequired;
+  valueInput.readOnly = valueReadonly;
   valueInput.value = value;
   valueCell.appendChild(valueInput);
 
@@ -76,6 +78,7 @@ export function replaceDataFields(fieldsBody, fields, options = {}) {
       createDataFieldRow(field.key, field.value, true, {
         ...options,
         multiline: Boolean(field.multiline),
+        valueReadonly: Boolean(field.valueReadonly || options.valueReadonly),
       }),
     );
   });
@@ -143,5 +146,37 @@ export function populateDataFields(fieldsBody, rawData) {
     const fieldValue =
       typeof value === "string" ? value : JSON.stringify(value);
     fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false));
+  });
+}
+
+export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
+  if (!fieldsBody) {
+    return;
+  }
+
+  const {
+    excludeKeys = [],
+    keyReadonly = false,
+    readonlyValueKeys = [],
+  } = options;
+  const excluded = new Set(excludeKeys);
+  const readonlyValues = new Set(readonlyValueKeys);
+  const entries = Object.entries(data || {}).filter(([key]) => !excluded.has(key));
+  fieldsBody.innerHTML = "";
+
+  if (entries.length === 0) {
+    fieldsBody.appendChild(createDataFieldRow("", "", false, { keyReadonly }));
+    return;
+  }
+
+  entries.forEach(([key, value]) => {
+    const fieldValue =
+      typeof value === "string" ? value : JSON.stringify(value);
+    fieldsBody.appendChild(
+      createDataFieldRow(key, fieldValue, false, {
+        keyReadonly,
+        valueReadonly: readonlyValues.has(key),
+      }),
+    );
   });
 }
