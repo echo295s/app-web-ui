@@ -1,5 +1,10 @@
 ﻿export function createDataFieldRow(key = "", value = "", required = true, options = {}) {
-  const { removable = false, multiline = false, keyReadonly = false } = options;
+  const {
+    removable = false,
+    multiline = false,
+    keyReadonly = false,
+    valueRequired = required,
+  } = options;
   const row = document.createElement("tr");
   row.className = "data-field-row";
 
@@ -20,7 +25,7 @@
     valueInput.type = "text";
   }
   valueInput.setAttribute("aria-label", "Value");
-  valueInput.required = required;
+  valueInput.required = valueRequired;
   valueInput.value = value;
   valueCell.appendChild(valueInput);
 
@@ -90,7 +95,7 @@ export function buildDataFromFields(fieldsBody) {
     const key = String(keyInput ? keyInput.value : "").trim();
     const value = String(valueInput ? valueInput.value : "").trim();
 
-    if (!key || !value) {
+    if (!key) {
       return;
     }
 

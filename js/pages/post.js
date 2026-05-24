@@ -102,7 +102,7 @@ export function initPostPage() {
     const rawData = buildDataFromFields(dataFields);
 
     if (!rawData) {
-      result.textContent = "キーと値を入力してください。";
+      result.textContent = "キーを入力してください。";
       return;
     }
 
@@ -118,7 +118,7 @@ export function initPostPage() {
       if (data.status === "success") {
         result.textContent = "保存しました。";
         postForm.reset();
-        resetDataFields(dataFields, { removable: true });
+        resetDataFields(dataFields, { removable: true, valueRequired: false });
         setActivePreset(jsonPresetTab);
         await loadRecords();
         return;
@@ -137,14 +137,16 @@ export function initPostPage() {
 
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
-      dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
+      dataFields.appendChild(
+        createDataFieldRow("", "", true, { removable: true, valueRequired: false }),
+      );
       setActivePreset(jsonPresetTab);
     });
   }
 
   if (jsonPresetTab) {
     jsonPresetTab.addEventListener("click", () => {
-      resetDataFields(dataFields, { removable: true });
+      resetDataFields(dataFields, { removable: true, valueRequired: false });
       setActivePreset(jsonPresetTab);
     });
   }
@@ -158,7 +160,7 @@ export function initPostPage() {
           { key: "title", value: "" },
           { key: "body", value: "", multiline: true },
         ],
-        { keyReadonly: true },
+        { keyReadonly: true, valueRequired: false },
       );
       setActivePreset(articlePresetTab);
     });
@@ -180,7 +182,9 @@ export function initPostPage() {
       setActivePreset(jsonPresetTab);
 
       if (!dataFields.querySelector(".data-field-row")) {
-        dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
+        dataFields.appendChild(
+          createDataFieldRow("", "", true, { removable: true, valueRequired: false }),
+        );
       }
     });
   }
