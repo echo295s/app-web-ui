@@ -21,16 +21,18 @@ export function initPostPage() {
   const searchTarget = document.querySelector("#search-target");
   const addFieldButton = document.querySelector("#add-field-button");
   const dataFields = document.querySelector("#data-fields");
-  const jsonPresetButton = document.querySelector("#json-preset-button");
-  const articlePresetButton = document.querySelector("#article-preset-button");
+  const jsonPresetTab = document.querySelector("#json-preset-tab");
+  const articlePresetTab = document.querySelector("#article-preset-tab");
 
   let records = [];
 
-  const setActivePreset = (activeButton) => {
-    const isArticlePreset = activeButton === articlePresetButton;
+  const setActivePreset = (activeTab) => {
+    const isArticlePreset = activeTab === articlePresetTab;
 
-    [jsonPresetButton, articlePresetButton].forEach((button) => {
-      button?.classList.toggle("active", button === activeButton);
+    [jsonPresetTab, articlePresetTab].forEach((tab) => {
+      const isActive = tab === activeTab;
+      tab?.classList.toggle("active", isActive);
+      tab?.setAttribute("aria-selected", String(isActive));
     });
 
     dataFields
@@ -117,7 +119,7 @@ export function initPostPage() {
         result.textContent = "保存しました。";
         postForm.reset();
         resetDataFields(dataFields, { removable: true });
-        setActivePreset(jsonPresetButton);
+        setActivePreset(jsonPresetTab);
         await loadRecords();
         return;
       }
@@ -136,19 +138,19 @@ export function initPostPage() {
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
       dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
-      setActivePreset(jsonPresetButton);
+      setActivePreset(jsonPresetTab);
     });
   }
 
-  if (jsonPresetButton) {
-    jsonPresetButton.addEventListener("click", () => {
+  if (jsonPresetTab) {
+    jsonPresetTab.addEventListener("click", () => {
       resetDataFields(dataFields, { removable: true });
-      setActivePreset(jsonPresetButton);
+      setActivePreset(jsonPresetTab);
     });
   }
 
-  if (articlePresetButton) {
-    articlePresetButton.addEventListener("click", () => {
+  if (articlePresetTab) {
+    articlePresetTab.addEventListener("click", () => {
       replaceDataFields(
         dataFields,
         [
@@ -158,7 +160,7 @@ export function initPostPage() {
         ],
         { keyReadonly: true },
       );
-      setActivePreset(articlePresetButton);
+      setActivePreset(articlePresetTab);
     });
   }
 
@@ -175,7 +177,7 @@ export function initPostPage() {
       }
 
       deleteButton.closest(".data-field-row")?.remove();
-      setActivePreset(jsonPresetButton);
+      setActivePreset(jsonPresetTab);
 
       if (!dataFields.querySelector(".data-field-row")) {
         dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));

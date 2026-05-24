@@ -19,11 +19,25 @@
           <button class="submit-button" type="submit" form="post-form">送信</button>
         </div>
         <form id="post-form">
-          <div class="preset-buttons" aria-label="入力プリセット">
-            <button id="json-preset-button" class="preset-button active" type="button">
+          <div class="preset-tabs" role="tablist" aria-label="入力プリセット">
+            <button
+              id="json-preset-tab"
+              class="preset-tab active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="data-fields"
+            >
               JSON
             </button>
-            <button id="article-preset-button" class="preset-button" type="button">
+            <button
+              id="article-preset-tab"
+              class="preset-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="data-fields"
+            >
               記事
             </button>
           </div>

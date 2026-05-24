@@ -174,20 +174,35 @@ button[type="submit"]:hover:not(:disabled) {
   gap: 0;
 }
 
-.preset-buttons {
+.preset-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0;
+  align-items: flex-end;
+  border-bottom: 1px solid #444;
 }
 
-.preset-button {
-  min-width: 88px;
-  padding: 8px 14px;
+.preset-tab {
+  width: auto;
+  min-width: 92px;
+  margin-bottom: -1px;
+  border-color: transparent;
+  border-bottom-color: #444;
+  border-radius: 4px 4px 0 0;
+  padding: 9px 16px;
+  background: transparent;
+  color: #bbb;
 }
 
-.preset-button.active {
-  border-color: #3b82f6;
-  background: #1d4ed8;
+.preset-tab:hover:not(:disabled) {
+  background: #222;
+  color: #eee;
+}
+
+.preset-tab.active {
+  border-color: #444;
+  border-bottom-color: #171717;
+  background: #171717;
   color: #fff;
   font-weight: 700;
 }
