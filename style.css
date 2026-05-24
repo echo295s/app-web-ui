@@ -327,6 +327,10 @@ td:nth-child(2) {
   width: 46px;
 }
 
+.data-fields-table.fixed-preset .data-field-action-heading {
+  display: none;
+}
+
 .data-fields-table td:nth-child(2) {
   white-space: normal;
 }

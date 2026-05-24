@@ -27,12 +27,18 @@ export function initPostPage() {
   let records = [];
 
   const setActivePreset = (activeButton) => {
+    const isArticlePreset = activeButton === articlePresetButton;
+
     [jsonPresetButton, articlePresetButton].forEach((button) => {
       button?.classList.toggle("active", button === activeButton);
     });
 
+    dataFields
+      ?.closest(".data-fields-table")
+      ?.classList.toggle("fixed-preset", isArticlePreset);
+
     if (addFieldButton) {
-      addFieldButton.disabled = activeButton === articlePresetButton;
+      addFieldButton.hidden = isArticlePreset;
     }
   };
 
