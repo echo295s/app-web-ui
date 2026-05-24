@@ -1,5 +1,10 @@
 ﻿import { requestJson } from "../api.js";
-import { buildDataFromFields, createDataFieldRow, resetDataFields } from "../data-fields.js";
+import {
+  buildDataFromFields,
+  createDataFieldRow,
+  replaceDataFields,
+  resetDataFields,
+} from "../data-fields.js";
 import { redirectToLogin } from "../navigation.js";
 import { clearSessionToken, getSessionToken } from "../session.js";
 import { renderRecords } from "../records.js";
@@ -16,8 +21,16 @@ export function initPostPage() {
   const searchTarget = document.querySelector("#search-target");
   const addFieldButton = document.querySelector("#add-field-button");
   const dataFields = document.querySelector("#data-fields");
+  const jsonPresetButton = document.querySelector("#json-preset-button");
+  const articlePresetButton = document.querySelector("#article-preset-button");
 
   let records = [];
+
+  const setActivePreset = (activeButton) => {
+    [jsonPresetButton, articlePresetButton].forEach((button) => {
+      button?.classList.toggle("active", button === activeButton);
+    });
+  };
 
   const renderCurrentRecords = () => {
     renderRecords({
@@ -94,6 +107,7 @@ export function initPostPage() {
         result.textContent = "保存しました。";
         postForm.reset();
         resetDataFields(dataFields, { removable: true });
+        setActivePreset(jsonPresetButton);
         await loadRecords();
         return;
       }
@@ -112,6 +126,29 @@ export function initPostPage() {
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
       dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));
+      setActivePreset(jsonPresetButton);
+    });
+  }
+
+  if (jsonPresetButton) {
+    jsonPresetButton.addEventListener("click", () => {
+      resetDataFields(dataFields, { removable: true });
+      setActivePreset(jsonPresetButton);
+    });
+  }
+
+  if (articlePresetButton) {
+    articlePresetButton.addEventListener("click", () => {
+      replaceDataFields(
+        dataFields,
+        [
+          { key: "type", value: "article" },
+          { key: "title", value: "" },
+          { key: "body", value: "", multiline: true },
+        ],
+        { removable: true },
+      );
+      setActivePreset(articlePresetButton);
     });
   }
 
@@ -128,6 +165,7 @@ export function initPostPage() {
       }
 
       deleteButton.closest(".data-field-row")?.remove();
+      setActivePreset(jsonPresetButton);
 
       if (!dataFields.querySelector(".data-field-row")) {
         dataFields.appendChild(createDataFieldRow("", "", true, { removable: true }));

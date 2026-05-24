@@ -1,5 +1,5 @@
 ﻿export function createDataFieldRow(key = "", value = "", required = true, options = {}) {
-  const { removable = false } = options;
+  const { removable = false, multiline = false } = options;
   const row = document.createElement("tr");
   row.className = "data-field-row";
 
@@ -13,9 +13,11 @@
   keyCell.appendChild(keyInput);
 
   const valueCell = document.createElement("td");
-  const valueInput = document.createElement("input");
+  const valueInput = document.createElement(multiline ? "textarea" : "input");
   valueInput.name = "dataValue";
-  valueInput.type = "text";
+  if (!multiline) {
+    valueInput.type = "text";
+  }
   valueInput.setAttribute("aria-label", "Value");
   valueInput.required = required;
   valueInput.value = value;
@@ -56,6 +58,23 @@ export function resetDataFields(fieldsBody, options = {}) {
   fieldsBody.appendChild(createDataFieldRow("", "", true, options));
 }
 
+export function replaceDataFields(fieldsBody, fields, options = {}) {
+  if (!fieldsBody) {
+    return;
+  }
+
+  fieldsBody.innerHTML = "";
+
+  fields.forEach((field) => {
+    fieldsBody.appendChild(
+      createDataFieldRow(field.key, field.value, true, {
+        ...options,
+        multiline: Boolean(field.multiline),
+      }),
+    );
+  });
+}
+
 export function buildDataFromFields(fieldsBody) {
   if (!fieldsBody) {
     return "";
@@ -66,7 +85,7 @@ export function buildDataFromFields(fieldsBody) {
 
   fieldsBody.querySelectorAll(".data-field-row").forEach((row) => {
     const keyInput = row.querySelector('input[name="dataKey"]');
-    const valueInput = row.querySelector('input[name="dataValue"]');
+    const valueInput = row.querySelector('[name="dataValue"]');
     const key = String(keyInput ? keyInput.value : "").trim();
     const value = String(valueInput ? valueInput.value : "").trim();
 

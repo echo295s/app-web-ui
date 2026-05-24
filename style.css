@@ -33,6 +33,11 @@ button {
   font: inherit;
 }
 
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 input,
 textarea,
 select {
@@ -162,6 +167,24 @@ button[type="submit"]:hover:not(:disabled) {
 .field-group {
   display: grid;
   gap: 0;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-button {
+  min-width: 88px;
+  padding: 8px 14px;
+}
+
+.preset-button.active {
+  border-color: #3b82f6;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
 }
 
 .page-header,
