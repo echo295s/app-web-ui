@@ -128,9 +128,23 @@ export function initPostPage() {
   }
 
   if (logoutButton) {
-    logoutButton.addEventListener("click", () => {
-      clearSessionToken();
-      redirectToLogin();
+    logoutButton.addEventListener("click", async () => {
+      const token = getSessionToken();
+      logoutButton.disabled = true;
+
+      try {
+        if (token) {
+          await requestJson({
+            action: "logout",
+            token,
+          });
+        }
+      } catch (error) {
+        // Local logout should still complete even if the session is already gone.
+      } finally {
+        clearSessionToken();
+        redirectToLogin();
+      }
     });
   }
 

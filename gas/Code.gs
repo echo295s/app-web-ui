@@ -8,27 +8,16 @@ const SESSION_TTL_SECONDS = 21600;
 
 function doGet(e) {
   const payload = e && e.parameter ? e.parameter : {};
+  const result = {
+    status: "error",
+    message: "POST required",
+  };
 
-  try {
-    const result = route(payload);
-
-    if (payload.callback) {
-      return jsonp(payload.callback, result);
-    }
-
-    return json(result);
-  } catch (error) {
-    const result = {
-      status: "error",
-      message: error.message || "Internal error",
-    };
-
-    if (payload.callback) {
-      return jsonp(payload.callback, result);
-    }
-
-    return json(result);
+  if (payload.callback) {
+    return jsonp(payload.callback, result);
   }
+
+  return json(result);
 }
 
 function doPost(e) {
@@ -52,13 +41,19 @@ function parseJsonPayload(e) {
 }
 
 function route(payload) {
-  if (payload.action === "login") {
+  const action = String(payload.action || "").trim();
+
+  if (action === "login") {
     return login(payload.password);
   }
 
   const authError = requireAuth(payload.token);
   if (authError) {
     return authError;
+  }
+
+  if (action === "logout") {
+    return logout(payload.token);
   }
 
   return handleDataRequest(payload);
@@ -98,6 +93,16 @@ function requireAuth(token) {
   }
 
   return null;
+}
+
+function logout(token) {
+  CacheService
+    .getScriptCache()
+    .remove(SESSION_CACHE_PREFIX + token);
+
+  return {
+    status: "success",
+  };
 }
 
 function handleDataRequest(payload) {

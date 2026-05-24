@@ -1,5 +1,7 @@
 ﻿import { API_ENDPOINT_URL } from "./config.js";
 
+const REQUEST_TIMEOUT_MS = 15000;
+
 function requestUrl() {
   if (!API_ENDPOINT_URL) {
     throw new Error("API_ENDPOINT_URL is not configured.");
@@ -9,39 +11,36 @@ function requestUrl() {
 }
 
 export async function requestJson(body) {
-  const callbackName =
-    "jsonp_" + Date.now() + "_" + Math.random().toString(36).slice(2);
   const url = requestUrl();
-  const script = document.createElement("script");
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
 
-  url.searchParams.set("callback", callbackName);
-  Object.entries(body).forEach(([key, value]) => {
-    url.searchParams.set(key, value == null ? "" : String(value));
-  });
+  try {
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      mode: "cors",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "text/plain",
+      },
+      body: JSON.stringify(body || {}),
+      signal: controller.signal,
+    });
 
-  return new Promise((resolve, reject) => {
-    const cleanup = () => {
-      script.remove();
-      delete window[callbackName];
-    };
-    const timeoutId = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("API request timed out."));
-    }, 15000);
+    if (!response.ok) {
+      throw new Error(`API request failed (${response.status}).`);
+    }
 
-    window[callbackName] = (data) => {
-      window.clearTimeout(timeoutId);
-      cleanup();
-      resolve(data);
-    };
+    return await response.json();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("API request timed out.");
+    }
 
-    script.onerror = () => {
-      window.clearTimeout(timeoutId);
-      cleanup();
-      reject(new Error("API request failed."));
-    };
-
-    script.src = url.toString();
-    document.head.appendChild(script);
-  });
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }

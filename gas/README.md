@@ -36,6 +36,15 @@ API側ではデータを加工せず、次の4列だけを保存します。
 
 以降のリクエストでは `token` を送ります。
 
+ログアウト:
+
+```json
+{
+  "action": "logout",
+  "token": "session-token"
+}
+```
+
 ## CRUD
 
 ### Create
@@ -102,5 +111,7 @@ API側ではデータを加工せず、次の4列だけを保存します。
 
 ## GitHub Pages からの呼び出し
 
-GET + JSONP に対応しています。`callback` と各パラメータをクエリ文字列に含めて呼び出せます。
-POST の場合は JSON body を送ってください。
+GitHub Pages 側からは POST で JSON を送ります。
+ブラウザの CORS プリフライトを避けるため、フロントエンドでは `Content-Type: text/plain` の本文として JSON 文字列を送っています。
+
+GET + JSONP は認証情報や長い本文が URL に入るため、現在は処理せず `POST required` を返します。
