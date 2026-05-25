@@ -52,27 +52,9 @@ function filterRecordViews(records, searchInput, searchTarget) {
   return records.map(recordView).filter(matchesSearch);
 }
 
-function stringifyFormattedValue(value) {
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
-
-  if (typeof value === "string") {
-    return value;
-  }
-
-  return JSON.stringify(value, null, 2);
-}
-
 function createFormattedRecordHeader(record) {
   const header = document.createElement("div");
   header.className = "formatted-record-header";
-
-  const idLink = document.createElement("a");
-  idLink.className = "record-link";
-  idLink.href = detailUrl(record.id);
-  idLink.textContent = displayRecordId(record.id);
-  header.appendChild(idLink);
 
   const timestamp = document.createElement("time");
   timestamp.textContent = formatTimestamp(record.timestamp) || "-";
@@ -81,37 +63,17 @@ function createFormattedRecordHeader(record) {
   return header;
 }
 
-function appendFormattedField(parent, label, value) {
-  const term = document.createElement("dt");
-  term.textContent = label;
-
-  const description = document.createElement("dd");
-  description.textContent = stringifyFormattedValue(value);
-
-  parent.append(term, description);
-}
-
 function createJsonFormattedRecord(record) {
   const parsed = parseRawDataObject(record.rawData);
   const item = document.createElement("article");
   item.className = "formatted-record-card";
   item.appendChild(createFormattedRecordHeader(record));
 
-  const fields = document.createElement("dl");
-  fields.className = "formatted-fields";
+  const data = document.createElement("pre");
+  data.className = "formatted-json";
+  data.textContent = parsed ? JSON.stringify(parsed, null, 2) : record.rawData || "-";
 
-  if (!parsed) {
-    appendFormattedField(fields, "Data", record.rawData);
-  } else {
-    const entries = Object.entries(parsed);
-    if (entries.length === 0) {
-      appendFormattedField(fields, "Data", "{}");
-    } else {
-      entries.forEach(([key, value]) => appendFormattedField(fields, key, value));
-    }
-  }
-
-  item.appendChild(fields);
+  item.appendChild(data);
   return item;
 }
 
