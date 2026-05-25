@@ -1,5 +1,7 @@
 ﻿import { detailUrl } from "./navigation.js";
 
+import { parseRawDataObject } from "./data-fields.js";
+
 export function recordView(record) {
   return {
     id: record.id || "",
@@ -30,17 +32,7 @@ export function displayRecordId(id) {
   return id ? String(id).slice(0, 8) : "-";
 }
 
-export function renderRecords({
-  records,
-  recordsBody,
-  listResult,
-  searchInput,
-  searchTarget,
-}) {
-  if (!recordsBody) {
-    return;
-  }
-
+function filterRecordViews(records, searchInput, searchTarget) {
   const matchesSearch = (record) => {
     const keyword = String(searchInput ? searchInput.value : "").trim().toLowerCase();
     const target = searchTarget ? searchTarget.value : "all";
@@ -57,7 +49,100 @@ export function renderRecords({
     return fields.some((value) => String(value || "").toLowerCase().includes(keyword));
   };
 
-  const rows = records.map(recordView).filter(matchesSearch);
+  return records.map(recordView).filter(matchesSearch);
+}
+
+function stringifyFormattedValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function createFormattedRecordHeader(record) {
+  const header = document.createElement("div");
+  header.className = "formatted-record-header";
+
+  const idLink = document.createElement("a");
+  idLink.className = "record-link";
+  idLink.href = detailUrl(record.id);
+  idLink.textContent = displayRecordId(record.id);
+  header.appendChild(idLink);
+
+  const timestamp = document.createElement("time");
+  timestamp.textContent = formatTimestamp(record.timestamp) || "-";
+  header.appendChild(timestamp);
+
+  return header;
+}
+
+function appendFormattedField(parent, label, value) {
+  const term = document.createElement("dt");
+  term.textContent = label;
+
+  const description = document.createElement("dd");
+  description.textContent = stringifyFormattedValue(value);
+
+  parent.append(term, description);
+}
+
+function createJsonFormattedRecord(record) {
+  const parsed = parseRawDataObject(record.rawData);
+  const item = document.createElement("article");
+  item.className = "formatted-record-card";
+  item.appendChild(createFormattedRecordHeader(record));
+
+  const fields = document.createElement("dl");
+  fields.className = "formatted-fields";
+
+  if (!parsed) {
+    appendFormattedField(fields, "Data", record.rawData);
+  } else {
+    const entries = Object.entries(parsed);
+    if (entries.length === 0) {
+      appendFormattedField(fields, "Data", "{}");
+    } else {
+      entries.forEach(([key, value]) => appendFormattedField(fields, key, value));
+    }
+  }
+
+  item.appendChild(fields);
+  return item;
+}
+
+function createArticleFormattedRecord(record, data) {
+  const item = document.createElement("article");
+  item.className = "formatted-record-card article-record-card";
+  item.appendChild(createFormattedRecordHeader(record));
+
+  const title = document.createElement("h3");
+  title.textContent = String(data.title || "無題の記事");
+  item.appendChild(title);
+
+  const body = document.createElement("p");
+  body.textContent = String(data.body || "-");
+  item.appendChild(body);
+
+  return item;
+}
+
+export function renderRecords({
+  records,
+  recordsBody,
+  listResult,
+  searchInput,
+  searchTarget,
+}) {
+  if (!recordsBody) {
+    return;
+  }
+
+  const rows = filterRecordViews(records, searchInput, searchTarget);
   recordsBody.innerHTML = "";
 
   if (rows.length === 0) {
@@ -94,5 +179,58 @@ export function renderRecords({
 
   if (listResult) {
     listResult.textContent = `${records.length}件中 ${rows.length}件を表示しています。`;
+  }
+}
+
+export function renderFormattedRecords({
+  records,
+  formattedRecords,
+  formattedListResult,
+  searchInput,
+  searchTarget,
+  activeType = "json",
+}) {
+  if (!formattedRecords) {
+    return;
+  }
+
+  const searchedRecords = filterRecordViews(records, searchInput, searchTarget);
+  const rows =
+    activeType === "json"
+      ? searchedRecords.map((record) => ({
+          record,
+          data: parseRawDataObject(record.rawData),
+        }))
+      : searchedRecords
+          .map((record) => ({
+            record,
+            data: parseRawDataObject(record.rawData),
+          }))
+          .filter(({ data }) => data?.type === activeType);
+
+  formattedRecords.innerHTML = "";
+
+  if (rows.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-message";
+    empty.textContent = "該当するデータがありません。";
+    formattedRecords.appendChild(empty);
+
+    if (formattedListResult) {
+      formattedListResult.textContent = `${records.length}件中 0件を表示しています。`;
+    }
+    return;
+  }
+
+  rows.forEach(({ record, data }) => {
+    formattedRecords.appendChild(
+      activeType === "article" && data
+        ? createArticleFormattedRecord(record, data)
+        : createJsonFormattedRecord(record),
+    );
+  });
+
+  if (formattedListResult) {
+    formattedListResult.textContent = `${records.length}件中 ${rows.length}件を表示しています。`;
   }
 }

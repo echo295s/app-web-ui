@@ -283,6 +283,65 @@ select {
   overflow-x: auto;
 }
 
+.formatted-record-list {
+  display: grid;
+  gap: 12px;
+}
+
+.formatted-record-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #141414;
+}
+
+.formatted-record-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  justify-content: space-between;
+  color: #bbb;
+  font-size: 0.9rem;
+}
+
+.formatted-fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.formatted-fields dt {
+  color: #bbb;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.formatted-fields dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.article-record-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.article-record-card p {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.empty-message {
+  margin: 0;
+  color: #bbb;
+}
+
 table {
   width: 100%;
   min-width: 720px;
@@ -400,6 +459,10 @@ td:nth-child(2) {
   }
 
   .record-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .formatted-fields {
     grid-template-columns: 1fr;
   }
 

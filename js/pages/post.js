@@ -9,7 +9,7 @@ import {
 import { handleUnauthorized } from "../auth.js";
 import { redirectToLogin } from "../navigation.js";
 import { clearSessionToken, getSessionToken } from "../session.js";
-import { renderRecords } from "../records.js";
+import { renderFormattedRecords, renderRecords } from "../records.js";
 
 export function initPostPage() {
   const postForm = document.querySelector("#post-form");
@@ -21,6 +21,9 @@ export function initPostPage() {
   const refreshButton = document.querySelector("#refresh-button");
   const searchInput = document.querySelector("#search-input");
   const searchTarget = document.querySelector("#search-target");
+  const formattedRecords = document.querySelector("#formatted-records");
+  const formattedListResult = document.querySelector("#formatted-list-result");
+  const formattedTabs = document.querySelectorAll("[data-formatted-type]");
   const addFieldButton = document.querySelector("#add-field-button");
   const dataFields = document.querySelector("#data-fields");
   const jsonPresetTab = document.querySelector("#json-preset-tab");
@@ -30,6 +33,7 @@ export function initPostPage() {
   );
 
   let records = [];
+  let activeFormattedType = "json";
   let isLoadingRecords = false;
   let isSubmitting = false;
   let latestRecordsRequestId = 0;
@@ -60,6 +64,14 @@ export function initPostPage() {
       searchInput,
       searchTarget,
     });
+    renderFormattedRecords({
+      records,
+      formattedRecords,
+      formattedListResult,
+      searchInput,
+      searchTarget,
+      activeType: activeFormattedType,
+    });
   };
 
   const loadRecords = async (options = {}) => {
@@ -77,6 +89,9 @@ export function initPostPage() {
     latestRecordsRequestId = requestId;
     isLoadingRecords = true;
     listResult.textContent = "取得中...";
+    if (formattedListResult) {
+      formattedListResult.textContent = "取得中...";
+    }
     if (refreshButton) {
       refreshButton.disabled = true;
     }
@@ -102,12 +117,18 @@ export function initPostPage() {
       }
 
       listResult.textContent = "一覧の取得に失敗しました。";
+      if (formattedListResult) {
+        formattedListResult.textContent = "一覧の取得に失敗しました。";
+      }
     } catch (error) {
       if (requestId !== latestRecordsRequestId) {
         return;
       }
 
       listResult.textContent = error.message;
+      if (formattedListResult) {
+        formattedListResult.textContent = error.message;
+      }
     } finally {
       if (requestId === latestRecordsRequestId) {
         isLoadingRecords = false;
@@ -220,6 +241,18 @@ export function initPostPage() {
   if (refreshButton) {
     refreshButton.addEventListener("click", () => loadRecords());
   }
+
+  formattedTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      activeFormattedType = tab.dataset.formattedType || "json";
+      formattedTabs.forEach((candidate) => {
+        const isActive = candidate === tab;
+        candidate.classList.toggle("active", isActive);
+        candidate.setAttribute("aria-selected", String(isActive));
+      });
+      renderCurrentRecords();
+    });
+  });
 
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {

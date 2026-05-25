@@ -126,6 +126,40 @@
         </div>
       </section>
 
+      <section class="panel" aria-labelledby="formatted-list-heading">
+        <div class="section-header">
+          <h2 id="formatted-list-heading">整形データ</h2>
+        </div>
+
+        <div class="preset-tabs" role="tablist" aria-label="整形表示形式">
+          <button
+            id="formatted-json-tab"
+            class="preset-tab active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="formatted-records"
+            data-formatted-type="json"
+          >
+            JSON
+          </button>
+          <button
+            id="formatted-article-tab"
+            class="preset-tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="formatted-records"
+            data-formatted-type="article"
+          >
+            記事
+          </button>
+        </div>
+
+        <p id="formatted-list-result">未取得です。</p>
+        <div id="formatted-records" class="formatted-record-list"></div>
+      </section>
+
       <div class="logout-area">
         <button id="logout-button" type="button">ログアウト</button>
       </div>
