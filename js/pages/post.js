@@ -2,6 +2,7 @@
 import {
   buildDataFromFields,
   createDataFieldRow,
+  findDuplicateDataKeys,
   replaceDataFields,
   resetDataFields,
 } from "../data-fields.js";
@@ -161,6 +162,16 @@ export function initPostPage() {
     }
 
     result.textContent = "送信中...";
+
+    const duplicateKeys = findDuplicateDataKeys(dataFields);
+    if (duplicateKeys.length > 0) {
+      result.textContent = `重複したキーがあります: ${duplicateKeys.join(", ")}`;
+      isSubmitting = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+      return;
+    }
 
     const rawData = buildDataFromFields(dataFields);
 

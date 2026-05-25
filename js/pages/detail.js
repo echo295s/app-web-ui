@@ -2,6 +2,7 @@
 import {
   buildDataFromFields,
   createDataFieldRow,
+  findDuplicateDataKeys,
   parseRawDataObject,
   populateDataFields,
   populateDataFieldsFromObject,
@@ -169,6 +170,12 @@ export function initDetailPage() {
 
     if (!currentParsedData) {
       detailResult.textContent = "JSONオブジェクト以外の生データは編集できません。";
+      return;
+    }
+
+    const duplicateKeys = findDuplicateDataKeys(detailDataFields);
+    if (duplicateKeys.length > 0) {
+      detailResult.textContent = `重複したキーがあります: ${duplicateKeys.join(", ")}`;
       return;
     }
 

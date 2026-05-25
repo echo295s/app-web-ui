@@ -5,6 +5,11 @@ const DEFAULT_DATA_SHEET_NAME = "raw_data";
 const DATA_HEADERS = ["id", "timestamp", "rawData", "deleted"];
 const SESSION_CACHE_PREFIX = "session:";
 const SESSION_TTL_SECONDS = 21600;
+const LOGIN_FAILURE_CACHE_KEY = "login:failures";
+const LOGIN_BLOCK_CACHE_KEY = "login:blocked";
+const LOGIN_FAILURE_TTL_SECONDS = 300;
+const LOGIN_BLOCK_TTL_SECONDS = 300;
+const LOGIN_MAX_FAILURES = 5;
 
 function doGet(e) {
   const payload = e && e.parameter ? e.parameter : {};
@@ -60,13 +65,20 @@ function route(payload) {
 }
 
 function login(password) {
+  if (isLoginBlocked()) {
+    return tooManyLoginAttempts();
+  }
+
   const savedPassword = PropertiesService
     .getScriptProperties()
     .getProperty(APP_PASSWORD_PROPERTY);
 
   if (!savedPassword || password !== savedPassword) {
+    registerLoginFailure();
     return unauthorized();
   }
+
+  clearLoginFailures();
 
   const token = Utilities.getUuid();
   CacheService
@@ -77,6 +89,36 @@ function login(password) {
     status: "success",
     token: token,
   };
+}
+
+function isLoginBlocked() {
+  return Boolean(CacheService
+    .getScriptCache()
+    .get(LOGIN_BLOCK_CACHE_KEY));
+}
+
+function registerLoginFailure() {
+  const cache = CacheService.getScriptCache();
+  const failureCount =
+    Number(cache.get(LOGIN_FAILURE_CACHE_KEY) || "0") + 1;
+
+  if (failureCount >= LOGIN_MAX_FAILURES) {
+    cache.put(LOGIN_BLOCK_CACHE_KEY, "1", LOGIN_BLOCK_TTL_SECONDS);
+    cache.remove(LOGIN_FAILURE_CACHE_KEY);
+    return;
+  }
+
+  cache.put(
+    LOGIN_FAILURE_CACHE_KEY,
+    String(failureCount),
+    LOGIN_FAILURE_TTL_SECONDS
+  );
+}
+
+function clearLoginFailures() {
+  CacheService
+    .getScriptCache()
+    .remove(LOGIN_FAILURE_CACHE_KEY);
 }
 
 function requireAuth(token) {
@@ -392,6 +434,13 @@ function unauthorized() {
   return {
     status: "error",
     message: "Unauthorized",
+  };
+}
+
+function tooManyLoginAttempts() {
+  return {
+    status: "error",
+    message: "Too many login attempts. Please try again later.",
   };
 }
 

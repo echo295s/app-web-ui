@@ -138,6 +138,33 @@ export function buildDataFromFields(fieldsBody, options = {}) {
   return hasField ? JSON.stringify(data) : "";
 }
 
+export function findDuplicateDataKeys(fieldsBody) {
+  if (!fieldsBody) {
+    return [];
+  }
+
+  const seen = new Set();
+  const duplicates = new Set();
+
+  fieldsBody.querySelectorAll(".data-field-row").forEach((row) => {
+    const keyInput = row.querySelector('input[name="dataKey"]');
+    const key = String(keyInput ? keyInput.value : "").trim();
+
+    if (!key) {
+      return;
+    }
+
+    if (seen.has(key)) {
+      duplicates.add(key);
+      return;
+    }
+
+    seen.add(key);
+  });
+
+  return Array.from(duplicates);
+}
+
 export function parseRawDataObject(rawData) {
   try {
     const parsed = JSON.parse(rawData || "{}");

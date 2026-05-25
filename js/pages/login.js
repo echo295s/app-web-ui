@@ -32,7 +32,11 @@ export function initLoginPage() {
       }
 
       result.textContent =
-        data.message === "Unauthorized" ? "認証に失敗しました。" : "ログインに失敗しました。";
+        data.message === "Unauthorized"
+          ? "認証に失敗しました。"
+          : data.message === "Too many login attempts. Please try again later."
+            ? "ログイン失敗が続いたため、しばらくしてから再試行してください。"
+            : "ログインに失敗しました。";
     } catch (error) {
       result.textContent = error.message;
     }
