@@ -302,18 +302,28 @@ select {
   flex-wrap: wrap;
   gap: 8px 14px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   color: #bbb;
   font-size: 0.9rem;
 }
 
-.formatted-json {
+.formatted-fields {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+  gap: 8px 12px;
   margin: 0;
-  overflow-x: auto;
+}
+
+.formatted-fields dt {
+  color: #bbb;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.formatted-fields dd {
+  margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-  line-height: 1.6;
 }
 
 .article-record-card h3 {
@@ -449,6 +459,10 @@ td:nth-child(2) {
   }
 
   .record-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .formatted-fields {
     grid-template-columns: 1fr;
   }
 
