@@ -326,6 +326,15 @@ select {
   overflow-wrap: anywhere;
 }
 
+.formatted-json {
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  line-height: 1.6;
+}
+
 .article-record-card h3 {
   margin: 0;
   font-size: 1.1rem;
