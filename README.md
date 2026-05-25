@@ -1,6 +1,7 @@
 ﻿# app-web-ui
 
 GitHub Pages で静的フロントエンドを公開するリポジトリです。
+https://echo295s.github.io/app-web-ui/post.html
 
 - `index.html`: ログインページ
 - `post.html`: 投稿フォーム
