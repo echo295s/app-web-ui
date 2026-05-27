@@ -79,7 +79,7 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  cursor: default;
+  cursor: pointer;
   opacity: 0.6;
 }
 
@@ -481,7 +481,7 @@ td:nth-child(2) {
 
 .field-row-delete-button:disabled {
   background: #222;
-  cursor: default;
+  cursor: pointer;
   opacity: 0.6;
 }
 
