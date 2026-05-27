@@ -1,6 +1,7 @@
 ﻿export function createDataFieldRow(key = "", value = "", required = true, options = {}) {
   const {
     removable = false,
+    disabledDelete = false,
     multiline = false,
     keyReadonly = false,
     valueReadonly = false,
@@ -31,7 +32,7 @@
   valueInput.value = value;
   valueCell.appendChild(valueInput);
 
-  if (!removable) {
+  if (!removable && !disabledDelete) {
     row.append(keyCell, valueCell);
     return row;
   }
@@ -42,7 +43,13 @@
   const deleteButton = document.createElement("button");
   deleteButton.className = "field-row-delete-button";
   deleteButton.type = "button";
-  deleteButton.dataset.deleteFieldRow = "";
+  deleteButton.disabled = disabledDelete;
+  if (disabledDelete) {
+    deleteButton.dataset.disabledDelete = "";
+  }
+  if (removable) {
+    deleteButton.dataset.deleteFieldRow = "";
+  }
   deleteButton.setAttribute("aria-label", "行を削除");
   deleteButton.title = "行を削除";
 
@@ -194,7 +201,7 @@ export function parseRawDataObject(rawData) {
   }
 }
 
-export function populateDataFields(fieldsBody, rawData) {
+export function populateDataFields(fieldsBody, rawData, options = {}) {
   if (!fieldsBody) {
     return;
   }
@@ -203,19 +210,19 @@ export function populateDataFields(fieldsBody, rawData) {
   fieldsBody.innerHTML = "";
 
   if (!parsed) {
-    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    fieldsBody.appendChild(createDataFieldRow("", "", false, options));
     return;
   }
 
   const entries = Object.entries(parsed);
   if (entries.length === 0) {
-    fieldsBody.appendChild(createDataFieldRow("", "", false));
+    fieldsBody.appendChild(createDataFieldRow("", "", false, options));
     return;
   }
 
   entries.forEach(([key, value]) => {
     const fieldValue = fieldValueToString(value);
-    fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false));
+    fieldsBody.appendChild(createDataFieldRow(key, fieldValue, false, options));
   });
 }
 
@@ -226,11 +233,13 @@ export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
 
   const {
     excludeKeys = [],
+    disabledDeleteKeys = [],
     keyReadonly = false,
     isRemovableKey = () => false,
     readonlyValueKeys = [],
   } = options;
   const excluded = new Set(excludeKeys);
+  const disabledDeletes = new Set(disabledDeleteKeys);
   const readonlyValues = new Set(readonlyValueKeys);
   const entries = Object.entries(data || {}).filter(([key]) => !excluded.has(key));
   fieldsBody.innerHTML = "";
@@ -245,6 +254,7 @@ export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
     fieldsBody.appendChild(
       createDataFieldRow(key, fieldValue, false, {
         keyReadonly,
+        disabledDelete: disabledDeletes.has(key),
         removable: isRemovableKey(key),
         valueReadonly: readonlyValues.has(key),
       }),

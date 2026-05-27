@@ -487,17 +487,42 @@ td:nth-child(2) {
   pointer-events: none;
 }
 
-.todo-edit-value {
+.todo-check-field {
+  display: grid;
+  gap: 10px;
+}
+
+.todo-check-field h3 {
+  margin: 0;
+  color: #bbb;
+  font-size: 1rem;
+}
+
+.todo-check-list {
+  display: grid;
+  gap: 8px;
+}
+
+.todo-check-row {
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: 10px;
   align-items: start;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #141414;
 }
 
-.todo-edit-value input[type="checkbox"] {
+.todo-check-row input {
   width: 18px;
   height: 18px;
-  margin: 14px 0 0;
+  margin: 2px 0 0;
+}
+
+.todo-check-row span {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {

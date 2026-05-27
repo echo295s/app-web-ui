@@ -36,6 +36,8 @@ export function initDetailPage() {
   const rawDataInput = document.querySelector("#raw-data-input");
   const articleBodyField = document.querySelector("#article-body-field");
   const articleBodyInput = document.querySelector("#article-body-input");
+  const todoCheckField = document.querySelector("#todo-check-field");
+  const todoCheckList = document.querySelector("#todo-check-list");
 
   let currentRecord = null;
   let currentParsedData = null;
@@ -49,7 +51,8 @@ export function initDetailPage() {
       detailForm
         .querySelectorAll("input, textarea, button")
         .forEach((control) => {
-          control.disabled = disabled;
+          control.disabled =
+            disabled || Boolean(control.dataset.disabledDelete);
         });
     }
 
@@ -78,61 +81,86 @@ export function initDetailPage() {
   };
 
   const getCheckedTodoKeys = () => {
-    if (!detailDataFields) {
+    if (!todoCheckList) {
       return [];
     }
 
     return Array.from(
-      detailDataFields.querySelectorAll("[data-todo-check]:checked"),
+      todoCheckList.querySelectorAll("[data-todo-check]:checked"),
     )
       .map((checkbox) => checkbox.dataset.todoCheck)
       .filter(Boolean);
   };
 
+  const getTodoItemsFromFields = () => {
+    if (!detailDataFields) {
+      return [];
+    }
+
+    return Array.from(detailDataFields.querySelectorAll(".data-field-row"))
+      .map((row) => {
+        const keyInput = row.querySelector('input[name="dataKey"]');
+        const valueInput = row.querySelector('[name="dataValue"]');
+        return {
+          key: String(keyInput ? keyInput.value : ""),
+          value: String(valueInput ? valueInput.value : ""),
+          row,
+          checked:
+            row.dataset.todoChecked === "true"
+              ? true
+              : row.dataset.todoChecked === "false"
+                ? false
+                : null,
+        };
+      })
+      .filter(({ key }) => isTodoKey(key));
+  };
+
   const renderTodoCheckControls = () => {
-    if (!detailDataFields || !isCurrentTodo) {
+    if (!todoCheckField || !todoCheckList) {
       return;
     }
 
-    const hasExistingControls = Boolean(
-      detailDataFields.querySelector("[data-todo-check]"),
-    );
+    const existingCheckedKeys = new Set(getCheckedTodoKeys());
+    const hasExistingControls = Boolean(todoCheckList.querySelector("[data-todo-check]"));
+    todoCheckField.hidden = !isCurrentTodo;
+    todoCheckList.innerHTML = "";
+
+    if (!isCurrentTodo) {
+      return;
+    }
+
     const savedCheckedKeys = Array.isArray(currentParsedData?.[TODO_CHECKED_KEY])
       ? currentParsedData[TODO_CHECKED_KEY]
       : [];
+    const checkedKeys = hasExistingControls
+      ? existingCheckedKeys
+      : new Set(savedCheckedKeys);
+    const todoItems = getTodoItemsFromFields();
 
-    detailDataFields.querySelectorAll(".data-field-row").forEach((row) => {
-      const keyInput = row.querySelector('input[name="dataKey"]');
-      const valueInput = row.querySelector('[name="dataValue"]');
-      const key = keyInput?.value;
+    if (todoItems.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "empty-message";
+      empty.textContent = "TODO項目がありません。";
+      todoCheckList.appendChild(empty);
+      return;
+    }
 
-      if (!isTodoKey(key) || !valueInput) {
-        return;
-      }
+    todoItems.forEach(({ key, value, row, checked }) => {
+      const label = document.createElement("label");
+      label.className = "todo-check-row";
 
-      const valueCell = valueInput.parentElement;
-      if (!valueCell) {
-        return;
-      }
-
-      let checkbox = row.querySelector("[data-todo-check]");
-      const wasChecked = Boolean(checkbox?.checked);
-      if (!checkbox) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "todo-edit-value";
-
-        checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        wrapper.appendChild(checkbox);
-
-        valueCell.replaceChildren(wrapper);
-        wrapper.appendChild(valueInput);
-      }
-
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
       checkbox.dataset.todoCheck = key;
-      checkbox.checked = hasExistingControls
-        ? wasChecked
-        : savedCheckedKeys.includes(key);
+      checkbox.checked = checked ?? checkedKeys.has(key);
+      delete row.dataset.todoChecked;
+
+      const text = document.createElement("span");
+      text.textContent = value || key;
+
+      label.append(checkbox, text);
+      todoCheckList.appendChild(label);
     });
   };
 
@@ -156,18 +184,24 @@ export function initDetailPage() {
     if (isCurrentArticle) {
       populateDataFieldsFromObject(detailDataFields, currentParsedData, {
         excludeKeys: ["body"],
+        disabledDeleteKeys: Object.keys(currentParsedData).filter(
+          (key) => key !== "body",
+        ),
         keyReadonly: true,
         readonlyValueKeys: ["type"],
       });
     } else if (isCurrentTodo) {
       populateDataFieldsFromObject(detailDataFields, currentParsedData, {
+        disabledDeleteKeys: ["type", TODO_CHECKED_KEY],
         keyReadonly: true,
         isRemovableKey: isTodoKey,
         readonlyValueKeys: ["type", TODO_CHECKED_KEY],
       });
       renderTodoCheckControls();
     } else if (currentParsedData) {
-      populateDataFields(detailDataFields, currentRecord.rawData);
+      populateDataFields(detailDataFields, currentRecord.rawData, {
+        removable: true,
+      });
     }
 
     if (detailAddFieldButton) {
@@ -176,6 +210,10 @@ export function initDetailPage() {
 
     if (articleBodyField) {
       articleBodyField.hidden = !isCurrentArticle;
+    }
+
+    if (!isCurrentTodo) {
+      renderTodoCheckControls();
     }
 
     if (articleBodyInput) {
@@ -414,11 +452,19 @@ export function initDetailPage() {
         return;
       }
 
-      detailDataFields.appendChild(createDataFieldRow("", "", false));
+      detailDataFields.appendChild(createDataFieldRow("", "", false, {
+        removable: true,
+      }));
     });
   }
 
   if (detailDataFields) {
+    detailDataFields.addEventListener("input", () => {
+      if (isCurrentTodo) {
+        renderTodoCheckControls();
+      }
+    });
+
     detailDataFields.addEventListener("click", (event) => {
       const target = event.target;
       if (!(target instanceof Element)) {
@@ -426,13 +472,31 @@ export function initDetailPage() {
       }
 
       const deleteButton = target.closest("[data-delete-field-row]");
-      if (!deleteButton || !isCurrentTodo) {
+      if (!deleteButton) {
         return;
       }
 
+      const checkedKeysBeforeDelete = new Set(getCheckedTodoKeys());
       deleteButton.closest(".data-field-row")?.remove();
-      renumberTodoRows(detailDataFields);
-      renderTodoCheckControls();
+
+      if (isCurrentTodo) {
+        detailDataFields.querySelectorAll(".data-field-row").forEach((row) => {
+          const keyInput = row.querySelector('input[name="dataKey"]');
+          if (isTodoKey(keyInput?.value)) {
+            row.dataset.todoChecked = String(
+              checkedKeysBeforeDelete.has(keyInput.value),
+            );
+          }
+        });
+        renumberTodoRows(detailDataFields);
+        renderTodoCheckControls();
+      }
+
+      if (!detailDataFields.querySelector(".data-field-row")) {
+        detailDataFields.appendChild(createDataFieldRow("", "", false, {
+          removable: true,
+        }));
+      }
     });
   }
 
