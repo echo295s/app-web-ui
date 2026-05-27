@@ -479,6 +479,10 @@ td:nth-child(2) {
   background: #2a2a2a;
 }
 
+.field-row-delete-button:disabled {
+  cursor: default;
+}
+
 .field-row-delete-button img {
   display: block;
   width: 16px;
