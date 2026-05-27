@@ -393,7 +393,7 @@ select {
 
 table {
   width: 100%;
-  min-width: 720px;
+  min-width: 560px;
   border-collapse: collapse;
 }
 
@@ -403,12 +403,12 @@ table {
 
 .records-table th:first-child,
 .records-table td:first-child {
-  width: 76px;
+  width: 56px;
 }
 
 .records-table th:last-child,
 .records-table td:last-child {
-  width: 180px;
+  width: 132px;
 }
 
 th,
