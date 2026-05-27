@@ -1,7 +1,7 @@
 ﻿import { detailUrl } from "./navigation.js";
 
 import { parseRawDataObject } from "./data-fields.js";
-import { TODO_CHECKED_KEY, isTodoKey } from "./todo.js";
+import { TODO_CHECKED_KEY, TODO_TYPE, isTodoKey } from "./todo.js";
 
 export function recordView(record) {
   return {
@@ -151,6 +151,10 @@ function createTodoFormattedRecord(record, data) {
   return item;
 }
 
+function isOtherFormattedType(data) {
+  return data?.type === "article" || data?.type === TODO_TYPE;
+}
+
 export function renderRecords({
   records,
   recordsBody,
@@ -217,10 +221,12 @@ export function renderFormattedRecords({
   const searchedRecords = filterRecordViews(records, searchInput, searchTarget);
   const rows =
     activeType === "json"
-      ? searchedRecords.map((record) => ({
-          record,
-          data: parseRawDataObject(record.rawData),
-        }))
+      ? searchedRecords
+          .map((record) => ({
+            record,
+            data: parseRawDataObject(record.rawData),
+          }))
+          .filter(({ data }) => !isOtherFormattedType(data))
       : searchedRecords
           .map((record) => ({
             record,
