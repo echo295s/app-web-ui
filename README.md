@@ -22,3 +22,9 @@ Apps Script のスクリプト プロパティには、必要に応じて以下�
 - `DATA_SHEET_NAME`: 保存先シート名。省略時は `raw_data`
 
 パスワードをこのリポジトリにコミットしないでください。
+
+## 入力プリセット
+
+- JSON: 任意のキーと値を登録する
+- 記事: `type`、`title`、`body` を登録する
+- TODO: `type`、`checked`、連番のTODO項目を登録する

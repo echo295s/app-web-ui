@@ -11,6 +11,14 @@ import { handleUnauthorized } from "../auth.js";
 import { getDetailId, redirectToLogin } from "../navigation.js";
 import { getSessionToken } from "../session.js";
 import { formatTimestamp, recordView } from "../records.js";
+import {
+  TODO_CHECKED_KEY,
+  TODO_TYPE,
+  appendTodoItemRow,
+  isTodoData,
+  isTodoKey,
+  renumberTodoRows,
+} from "../todo.js";
 
 export function initDetailPage() {
   const detailForm = document.querySelector("#detail-form");
@@ -32,6 +40,7 @@ export function initDetailPage() {
   let currentRecord = null;
   let currentParsedData = null;
   let isCurrentArticle = false;
+  let isCurrentTodo = false;
   let isUpdating = false;
   let isDeleting = false;
 
@@ -55,6 +64,78 @@ export function initDetailPage() {
 
   const isArticleData = (data) => data?.type === "article";
 
+  const pruneTodoCheckedKeys = (data) => {
+    const todoKeys = new Set(Object.keys(data).filter(isTodoKey));
+    const checked = Array.isArray(data[TODO_CHECKED_KEY])
+      ? data[TODO_CHECKED_KEY]
+      : [];
+
+    return {
+      ...data,
+      type: TODO_TYPE,
+      [TODO_CHECKED_KEY]: checked.filter((key) => todoKeys.has(key)),
+    };
+  };
+
+  const getCheckedTodoKeys = () => {
+    if (!detailDataFields) {
+      return [];
+    }
+
+    return Array.from(
+      detailDataFields.querySelectorAll("[data-todo-check]:checked"),
+    )
+      .map((checkbox) => checkbox.dataset.todoCheck)
+      .filter(Boolean);
+  };
+
+  const renderTodoCheckControls = () => {
+    if (!detailDataFields || !isCurrentTodo) {
+      return;
+    }
+
+    const hasExistingControls = Boolean(
+      detailDataFields.querySelector("[data-todo-check]"),
+    );
+    const savedCheckedKeys = Array.isArray(currentParsedData?.[TODO_CHECKED_KEY])
+      ? currentParsedData[TODO_CHECKED_KEY]
+      : [];
+
+    detailDataFields.querySelectorAll(".data-field-row").forEach((row) => {
+      const keyInput = row.querySelector('input[name="dataKey"]');
+      const valueInput = row.querySelector('[name="dataValue"]');
+      const key = keyInput?.value;
+
+      if (!isTodoKey(key) || !valueInput) {
+        return;
+      }
+
+      const valueCell = valueInput.parentElement;
+      if (!valueCell) {
+        return;
+      }
+
+      let checkbox = row.querySelector("[data-todo-check]");
+      const wasChecked = Boolean(checkbox?.checked);
+      if (!checkbox) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "todo-edit-value";
+
+        checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        wrapper.appendChild(checkbox);
+
+        valueCell.replaceChildren(wrapper);
+        wrapper.appendChild(valueInput);
+      }
+
+      checkbox.dataset.todoCheck = key;
+      checkbox.checked = hasExistingControls
+        ? wasChecked
+        : savedCheckedKeys.includes(key);
+    });
+  };
+
   const syncStructuredEditor = () => {
     const canEditStructuredData = Boolean(currentParsedData);
 
@@ -70,6 +151,7 @@ export function initDetailPage() {
   const renderDetailFields = () => {
     currentParsedData = parseRawDataObject(currentRecord?.rawData);
     isCurrentArticle = isArticleData(currentParsedData);
+    isCurrentTodo = isTodoData(currentParsedData);
 
     if (isCurrentArticle) {
       populateDataFieldsFromObject(detailDataFields, currentParsedData, {
@@ -77,6 +159,13 @@ export function initDetailPage() {
         keyReadonly: true,
         readonlyValueKeys: ["type"],
       });
+    } else if (isCurrentTodo) {
+      populateDataFieldsFromObject(detailDataFields, currentParsedData, {
+        keyReadonly: true,
+        isRemovableKey: isTodoKey,
+        readonlyValueKeys: ["type", TODO_CHECKED_KEY],
+      });
+      renderTodoCheckControls();
     } else if (currentParsedData) {
       populateDataFields(detailDataFields, currentRecord.rawData);
     }
@@ -191,6 +280,14 @@ export function initDetailPage() {
         body: String(articleBodyInput ? articleBodyInput.value : ""),
       };
       rawData = JSON.stringify(updatedArticle);
+    } else if (isCurrentTodo) {
+      const updatedTodo = JSON.parse(
+        buildDataFromFields(detailDataFields, {
+          sourceData: currentParsedData,
+        }) || "{}",
+      );
+      updatedTodo[TODO_CHECKED_KEY] = getCheckedTodoKeys();
+      rawData = JSON.stringify(pruneTodoCheckedKeys(updatedTodo));
     } else {
       rawData = buildDataFromFields(detailDataFields, {
         sourceData: currentParsedData,
@@ -311,7 +408,31 @@ export function initDetailPage() {
 
   if (detailAddFieldButton && detailDataFields) {
     detailAddFieldButton.addEventListener("click", () => {
+      if (isCurrentTodo) {
+        appendTodoItemRow(detailDataFields);
+        renderTodoCheckControls();
+        return;
+      }
+
       detailDataFields.appendChild(createDataFieldRow("", "", false));
+    });
+  }
+
+  if (detailDataFields) {
+    detailDataFields.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return;
+      }
+
+      const deleteButton = target.closest("[data-delete-field-row]");
+      if (!deleteButton || !isCurrentTodo) {
+        return;
+      }
+
+      deleteButton.closest(".data-field-row")?.remove();
+      renumberTodoRows(detailDataFields);
+      renderTodoCheckControls();
     });
   }
 

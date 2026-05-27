@@ -1,6 +1,7 @@
 ﻿import { detailUrl } from "./navigation.js";
 
 import { parseRawDataObject } from "./data-fields.js";
+import { TODO_CHECKED_KEY, isTodoKey } from "./todo.js";
 
 export function recordView(record) {
   return {
@@ -99,6 +100,57 @@ function createArticleFormattedRecord(record, data) {
   return item;
 }
 
+function createTodoFormattedRecord(record, data) {
+  const item = document.createElement("article");
+  item.className = "formatted-record-card todo-record-card";
+  item.appendChild(createFormattedRecordHeader(record));
+
+  const checked = Array.isArray(data[TODO_CHECKED_KEY])
+    ? new Set(data[TODO_CHECKED_KEY])
+    : new Set();
+  const todoEntries = Object.entries(data)
+    .filter(([key]) => isTodoKey(key))
+    .sort(
+      ([left], [right]) =>
+        Number(left.replace("todo", "")) - Number(right.replace("todo", "")),
+    );
+  const checkedTodoCount = todoEntries.filter(([key]) => checked.has(key)).length;
+
+  const heading = document.createElement("h3");
+  heading.textContent = `TODO ${checkedTodoCount}/${todoEntries.length}`;
+  item.appendChild(heading);
+
+  if (todoEntries.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "empty-message";
+    empty.textContent = "TODO項目がありません。";
+    item.appendChild(empty);
+    return item;
+  }
+
+  const list = document.createElement("ul");
+  list.className = "todo-record-list";
+
+  todoEntries.forEach(([key, value]) => {
+    const listItem = document.createElement("li");
+    listItem.className = checked.has(key) ? "checked" : "";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = checked.has(key);
+    checkbox.disabled = true;
+    listItem.appendChild(checkbox);
+
+    const label = document.createElement("span");
+    label.textContent = String(value || "-");
+    listItem.appendChild(label);
+    list.appendChild(listItem);
+  });
+
+  item.appendChild(list);
+  return item;
+}
+
 export function renderRecords({
   records,
   recordsBody,
@@ -191,11 +243,17 @@ export function renderFormattedRecords({
   }
 
   rows.forEach(({ record, data }) => {
-    formattedRecords.appendChild(
-      activeType === "article" && data
-        ? createArticleFormattedRecord(record, data)
-        : createJsonFormattedRecord(record),
-    );
+    if (activeType === "article" && data) {
+      formattedRecords.appendChild(createArticleFormattedRecord(record, data));
+      return;
+    }
+
+    if (activeType === "todo" && data) {
+      formattedRecords.appendChild(createTodoFormattedRecord(record, data));
+      return;
+    }
+
+    formattedRecords.appendChild(createJsonFormattedRecord(record));
   });
 
   if (formattedListResult) {

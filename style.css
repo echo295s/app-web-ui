@@ -350,6 +350,42 @@ select {
   white-space: pre-wrap;
 }
 
+.todo-record-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.todo-record-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-record-list li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.todo-record-list input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+}
+
+.todo-record-list span {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.todo-record-list li.checked span {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
 .empty-message {
   margin: 0;
   color: #bbb;
@@ -449,6 +485,19 @@ td:nth-child(2) {
   height: 16px;
   filter: invert(100%);
   pointer-events: none;
+}
+
+.todo-edit-value {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.todo-edit-value input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 14px 0 0;
 }
 
 @media (max-width: 720px) {

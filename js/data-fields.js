@@ -88,9 +88,24 @@ function fieldValueToString(value) {
   return typeof value === "string" ? value : JSON.stringify(value);
 }
 
+function parseStructuredFieldValue(value) {
+  const trimmed = String(value || "").trim();
+
+  if (!trimmed.startsWith("[") && !trimmed.startsWith("{")) {
+    return { parsed: false, value };
+  }
+
+  try {
+    return { parsed: true, value: JSON.parse(trimmed) };
+  } catch (error) {
+    return { parsed: false, value };
+  }
+}
+
 function buildValueFromField(value, sourceValue, hasSourceValue) {
   if (!hasSourceValue || typeof sourceValue === "string") {
-    return value;
+    const structuredValue = parseStructuredFieldValue(value);
+    return structuredValue.parsed ? structuredValue.value : value;
   }
 
   if (value === fieldValueToString(sourceValue)) {
@@ -212,6 +227,7 @@ export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
   const {
     excludeKeys = [],
     keyReadonly = false,
+    isRemovableKey = () => false,
     readonlyValueKeys = [],
   } = options;
   const excluded = new Set(excludeKeys);
@@ -229,6 +245,7 @@ export function populateDataFieldsFromObject(fieldsBody, data, options = {}) {
     fieldsBody.appendChild(
       createDataFieldRow(key, fieldValue, false, {
         keyReadonly,
+        removable: isRemovableKey(key),
         valueReadonly: readonlyValues.has(key),
       }),
     );

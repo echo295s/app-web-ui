@@ -10,6 +10,13 @@ import { handleUnauthorized } from "../auth.js";
 import { redirectToLogin } from "../navigation.js";
 import { clearSessionToken, getSessionToken } from "../session.js";
 import { renderFormattedRecords, renderRecords } from "../records.js";
+import {
+  TODO_CHECKED_KEY,
+  TODO_TYPE,
+  appendTodoItemRow,
+  createTodoItemRow,
+  renumberTodoRows,
+} from "../todo.js";
 
 export function initPostPage() {
   const postForm = document.querySelector("#post-form");
@@ -28,20 +35,24 @@ export function initPostPage() {
   const dataFields = document.querySelector("#data-fields");
   const jsonPresetTab = document.querySelector("#json-preset-tab");
   const articlePresetTab = document.querySelector("#article-preset-tab");
+  const todoPresetTab = document.querySelector("#todo-preset-tab");
   const submitButton = document.querySelector(
     'button[form="post-form"][type="submit"]',
   );
 
   let records = [];
   let activeFormattedType = "json";
+  let activePreset = "json";
   let isLoadingRecords = false;
   let isSubmitting = false;
   let latestRecordsRequestId = 0;
 
   const setActivePreset = (activeTab) => {
     const isArticlePreset = activeTab === articlePresetTab;
+    const isTodoPreset = activeTab === todoPresetTab;
+    activePreset = isTodoPreset ? TODO_TYPE : isArticlePreset ? "article" : "json";
 
-    [jsonPresetTab, articlePresetTab].forEach((tab) => {
+    [jsonPresetTab, articlePresetTab, todoPresetTab].forEach((tab) => {
       const isActive = tab === activeTab;
       tab?.classList.toggle("active", isActive);
       tab?.setAttribute("aria-selected", String(isActive));
@@ -256,6 +267,11 @@ export function initPostPage() {
 
   if (addFieldButton && dataFields) {
     addFieldButton.addEventListener("click", () => {
+      if (activePreset === TODO_TYPE) {
+        appendTodoItemRow(dataFields);
+        return;
+      }
+
       dataFields.appendChild(
         createDataFieldRow("", "", true, { removable: true, valueRequired: false }),
       );
@@ -285,6 +301,30 @@ export function initPostPage() {
     });
   }
 
+  if (todoPresetTab) {
+    todoPresetTab.addEventListener("click", () => {
+      if (!dataFields) {
+        return;
+      }
+
+      dataFields.innerHTML = "";
+      dataFields.appendChild(
+        createDataFieldRow("type", TODO_TYPE, true, {
+          keyReadonly: true,
+          valueReadonly: true,
+        }),
+      );
+      dataFields.appendChild(
+        createDataFieldRow(TODO_CHECKED_KEY, "[]", true, {
+          keyReadonly: true,
+          valueReadonly: true,
+        }),
+      );
+      dataFields.appendChild(createTodoItemRow("todo1"));
+      setActivePreset(todoPresetTab);
+    });
+  }
+
   if (dataFields) {
     dataFields.addEventListener("click", (event) => {
       const target = event.target;
@@ -298,6 +338,11 @@ export function initPostPage() {
       }
 
       deleteButton.closest(".data-field-row")?.remove();
+      if (activePreset === TODO_TYPE) {
+        renumberTodoRows(dataFields);
+        return;
+      }
+
       setActivePreset(jsonPresetTab);
 
       if (!dataFields.querySelector(".data-field-row")) {
