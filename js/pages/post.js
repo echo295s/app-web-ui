@@ -310,12 +310,14 @@ export function initPostPage() {
       dataFields.innerHTML = "";
       dataFields.appendChild(
         createDataFieldRow("type", TODO_TYPE, true, {
+          disabledDelete: true,
           keyReadonly: true,
           valueReadonly: true,
         }),
       );
       dataFields.appendChild(
         createDataFieldRow(TODO_CHECKED_KEY, "[]", true, {
+          disabledDelete: true,
           keyReadonly: true,
           valueReadonly: true,
         }),
