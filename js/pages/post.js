@@ -79,9 +79,17 @@ export function initPostPage() {
       records,
       formattedRecords,
       formattedListResult,
+      activeType: activeFormattedType,
+    });
+  };
+
+  const renderCurrentRecordTable = () => {
+    renderRecords({
+      records,
+      recordsBody,
+      listResult,
       searchInput,
       searchTarget,
-      activeType: activeFormattedType,
     });
   };
 
@@ -356,8 +364,8 @@ export function initPostPage() {
   }
 
   if (searchForm) {
-    searchForm.addEventListener("input", renderCurrentRecords);
-    searchForm.addEventListener("change", renderCurrentRecords);
+    searchForm.addEventListener("input", renderCurrentRecordTable);
+    searchForm.addEventListener("change", renderCurrentRecordTable);
     searchForm.addEventListener("submit", (event) => {
       event.preventDefault();
     });
