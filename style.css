@@ -397,6 +397,20 @@ table {
   border-collapse: collapse;
 }
 
+.records-table {
+  table-layout: fixed;
+}
+
+.records-table th:first-child,
+.records-table td:first-child {
+  width: 104px;
+}
+
+.records-table th:last-child,
+.records-table td:last-child {
+  width: 180px;
+}
+
 th,
 td {
   padding: 12px;
