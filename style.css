@@ -312,10 +312,12 @@ select {
 .formatted-record-card {
   display: grid;
   gap: 12px;
+  min-width: 0;
   padding: 14px;
   border: 1px solid #333;
   border-radius: 6px;
   background: #141414;
+  overflow-wrap: anywhere;
 }
 
 .formatted-record-header {
@@ -324,6 +326,7 @@ select {
   gap: 8px 14px;
   align-items: center;
   justify-content: space-between;
+  min-width: 0;
   color: #bbb;
   font-size: 0.9rem;
 }
@@ -359,12 +362,14 @@ select {
 .article-record-card h3 {
   margin: 0;
   font-size: 1.1rem;
+  overflow-wrap: anywhere;
 }
 
 .article-record-card p {
   margin: 0;
   line-height: 1.7;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .todo-record-card h3 {
