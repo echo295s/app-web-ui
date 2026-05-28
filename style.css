@@ -79,7 +79,7 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  cursor: pointer;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 
@@ -494,9 +494,10 @@ td:nth-child(2) {
 }
 
 .field-row-delete-button:disabled {
-  background: #222;
-  cursor: pointer;
-  opacity: 0.6;
+  border-color: #383838;
+  background: #2f2f2f;
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .field-row-delete-button img {
@@ -505,6 +506,11 @@ td:nth-child(2) {
   height: 16px;
   filter: invert(100%);
   pointer-events: none;
+}
+
+.field-row-delete-button:disabled img {
+  filter: invert(62%);
+  opacity: 0.5;
 }
 
 .todo-check-field {
