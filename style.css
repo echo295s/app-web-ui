@@ -153,6 +153,10 @@ button[type="submit"]:hover:not(:disabled) {
   text-decoration: none;
 }
 
+.value-link {
+  overflow-wrap: anywhere;
+}
+
 .record-meta {
   display: grid;
   gap: 12px;

@@ -33,6 +33,39 @@ export function displayRecordId(id) {
   return id ? String(id).slice(0, 8) : "-";
 }
 
+function linkableUrl(value) {
+  const text = String(value || "").trim();
+
+  if (!text) {
+    return "";
+  }
+
+  try {
+    const url = new URL(text);
+    return ["http:", "https:"].includes(url.protocol) ? text : "";
+  } catch {
+    return "";
+  }
+}
+
+function appendDisplayValue(parent, value) {
+  const text = String(value || "-");
+  const url = linkableUrl(value);
+
+  if (!url) {
+    parent.textContent = text;
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.className = "value-link";
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = text;
+  parent.appendChild(link);
+}
+
 function filterRecordViews(records, searchInput, searchTarget) {
   const matchesSearch = (record) => {
     const keyword = String(searchInput ? searchInput.value : "").trim().toLowerCase();
@@ -94,7 +127,7 @@ function createArticleFormattedRecord(record, data) {
   item.appendChild(title);
 
   const body = document.createElement("p");
-  body.textContent = String(data.body || "-");
+  appendDisplayValue(body, data.body);
   item.appendChild(body);
 
   return item;
@@ -142,7 +175,7 @@ function createTodoFormattedRecord(record, data) {
     listItem.appendChild(checkbox);
 
     const label = document.createElement("span");
-    label.textContent = String(value || "-");
+    appendDisplayValue(label, value);
     listItem.appendChild(label);
     list.appendChild(listItem);
   });
@@ -208,7 +241,7 @@ export function renderRecords({
 
     [record.rawData, formatTimestamp(record.timestamp)].forEach((value) => {
       const cell = document.createElement("td");
-      cell.textContent = value || "-";
+      appendDisplayValue(cell, value);
       row.appendChild(cell);
     });
     recordsBody.appendChild(row);
