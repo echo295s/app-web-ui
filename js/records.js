@@ -49,7 +49,12 @@ function linkableUrl(value) {
 }
 
 function appendDisplayValue(parent, value) {
-  const text = String(value || "-");
+  const text =
+    value == null || value === ""
+      ? "-"
+      : typeof value === "string"
+        ? value
+        : JSON.stringify(value, null, 2);
   const url = linkableUrl(value);
 
   if (!url) {
@@ -64,6 +69,23 @@ function appendDisplayValue(parent, value) {
   link.rel = "noopener noreferrer";
   link.textContent = text;
   parent.appendChild(link);
+}
+
+function createFormattedFields(data) {
+  const fields = document.createElement("dl");
+  fields.className = "formatted-fields";
+
+  Object.entries(data).forEach(([key, value]) => {
+    const term = document.createElement("dt");
+    term.textContent = key;
+    fields.appendChild(term);
+
+    const description = document.createElement("dd");
+    appendDisplayValue(description, value);
+    fields.appendChild(description);
+  });
+
+  return fields;
 }
 
 function filterRecordViews(records, searchInput, searchTarget) {
@@ -109,9 +131,14 @@ function createJsonFormattedRecord(record) {
   item.className = "formatted-record-card";
   item.appendChild(createFormattedRecordHeader(record));
 
+  if (parsed) {
+    item.appendChild(createFormattedFields(parsed));
+    return item;
+  }
+
   const data = document.createElement("pre");
   data.className = "formatted-json";
-  data.textContent = parsed ? JSON.stringify(parsed, null, 2) : record.rawData || "-";
+  appendDisplayValue(data, record.rawData);
 
   item.appendChild(data);
   return item;
