@@ -52,7 +52,7 @@ export function initDetailPage() {
         .querySelectorAll("input, textarea, button")
         .forEach((control) => {
           control.disabled =
-            disabled || Boolean(control.dataset.disabledDelete);
+            disabled || control.hasAttribute("data-disabled-delete");
         });
     }
 
