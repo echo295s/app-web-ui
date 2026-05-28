@@ -112,6 +112,19 @@ button[type="submit"]:hover:not(:disabled) {
   background: #7f1d1d;
 }
 
+.delete-button:disabled {
+  border-color: #383838;
+  background: #2f2f2f;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.delete-button:disabled img {
+  filter: invert(62%);
+  opacity: 0.5;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -497,24 +510,12 @@ td:nth-child(2) {
   background: #2a2a2a;
 }
 
-.field-row-delete-button:disabled {
-  border-color: #383838;
-  background: #2f2f2f;
-  cursor: not-allowed;
-  opacity: 1;
-}
-
 .field-row-delete-button img {
   display: block;
   width: 16px;
   height: 16px;
   filter: invert(100%);
   pointer-events: none;
-}
-
-.field-row-delete-button:disabled img {
-  filter: invert(62%);
-  opacity: 0.5;
 }
 
 .todo-check-field {

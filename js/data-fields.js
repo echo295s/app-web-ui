@@ -41,7 +41,7 @@
   actionCell.className = "data-field-action-cell";
 
   const deleteButton = document.createElement("button");
-  deleteButton.className = "field-row-delete-button";
+  deleteButton.className = "field-row-delete-button delete-button";
   deleteButton.type = "button";
   deleteButton.disabled = disabledDelete;
   if (disabledDelete) {
