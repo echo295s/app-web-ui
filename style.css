@@ -403,7 +403,7 @@ table {
 
 .records-table th:first-child,
 .records-table td:first-child {
-  width: 56px;
+  width: 80px;
 }
 
 .records-table th:last-child,
