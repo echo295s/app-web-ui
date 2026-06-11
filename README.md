@@ -2,14 +2,17 @@
 
 GitHub Pages で静的フロントエンドを公開するリポジトリです。
 
-https://echo295s.github.io/app-web-ui/post.html
+https://echo295s.github.io/app-web-ui/
 
 - `index.html`: ログインページ
-- `post.html`: 投稿フォーム
-- `detail.html`: データ詳細・更新・削除ページ
-- `js/`: ページ初期化、POST API 呼び出し、`sessionStorage` によるトークン管理
+- `apps/index.html`: ログイン後のアプリ選択ページ
+- `apps/data-management/`: データ管理アプリ
+- `apps/dummy/`: ダミーアプリ
+- `js/`: 共通の認証、API 呼び出し、`sessionStorage` によるトークン管理
 - `style.css`: 共通スタイル
 - `gas/`: Google Apps Script API コード
+
+旧URLの `post.html` と `detail.html` は、データ管理アプリ配下の新URLへ転送します。
 
 ## 設定
 

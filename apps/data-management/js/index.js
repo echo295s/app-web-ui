@@ -1,22 +1,25 @@
-﻿import { requestJson } from "../api.js";
+import { requestJson } from "../../../js/api.js";
+import {
+  requireSession,
+  setupLogout,
+} from "../../../js/authenticated-page.js";
 import {
   buildDataFromFields,
   createDataFieldRow,
   findDuplicateDataKeys,
   replaceDataFields,
   resetDataFields,
-} from "../data-fields.js";
-import { handleUnauthorized } from "../auth.js";
-import { redirectToLogin } from "../navigation.js";
-import { clearSessionToken, getSessionToken } from "../session.js";
-import { renderFormattedRecords, renderRecords } from "../records.js";
+} from "./data-fields.js";
+import { handleUnauthorized } from "../../../js/auth.js";
+import { getSessionToken } from "../../../js/session.js";
+import { renderFormattedRecords, renderRecords } from "./records.js";
 import {
   TODO_CHECKED_KEY,
   TODO_TYPE,
   appendTodoItemRow,
   createTodoItemRow,
   renumberTodoRows,
-} from "../todo.js";
+} from "./todo.js";
 
 export function initPostPage() {
   const postForm = document.querySelector("#post-form");
@@ -163,31 +166,11 @@ export function initPostPage() {
     return;
   }
 
-  if (!getSessionToken()) {
-    redirectToLogin();
+  if (!requireSession()) {
     return;
   }
 
-  if (logoutButton) {
-    logoutButton.addEventListener("click", async () => {
-      const token = getSessionToken();
-      logoutButton.disabled = true;
-
-      try {
-        if (token) {
-          await requestJson({
-            action: "logout",
-            token,
-          });
-        }
-      } catch (error) {
-        // Local logout should still complete even if the session is already gone.
-      } finally {
-        clearSessionToken();
-        redirectToLogin();
-      }
-    });
-  }
+  setupLogout(logoutButton);
 
   postForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -373,3 +356,5 @@ export function initPostPage() {
 
   loadRecords();
 }
+
+initPostPage();

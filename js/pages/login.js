@@ -1,6 +1,6 @@
 ﻿import { requestJson } from "../api.js";
 import { getSessionToken, setSessionToken } from "../session.js";
-import { redirectToPost } from "../navigation.js";
+import { redirectToAppSelector } from "../navigation.js";
 
 export function initLoginPage() {
   const loginForm = document.querySelector("#login-form");
@@ -11,7 +11,8 @@ export function initLoginPage() {
   }
 
   if (getSessionToken()) {
-    redirectToPost();
+    redirectToAppSelector();
+    return;
   }
 
   loginForm.addEventListener("submit", async (event) => {
@@ -27,7 +28,7 @@ export function initLoginPage() {
 
       if (data.status === "success" && token) {
         setSessionToken(token);
-        redirectToPost();
+        redirectToAppSelector();
         return;
       }
 
@@ -42,3 +43,5 @@ export function initLoginPage() {
     }
   });
 }
+
+initLoginPage();

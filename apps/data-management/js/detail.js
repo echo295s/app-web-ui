@@ -1,4 +1,5 @@
-﻿import { requestJson } from "../api.js";
+import { requestJson } from "../../../js/api.js";
+import { requireSession } from "../../../js/authenticated-page.js";
 import {
   buildDataFromFields,
   createDataFieldRow,
@@ -6,11 +7,11 @@ import {
   parseRawDataObject,
   populateDataFields,
   populateDataFieldsFromObject,
-} from "../data-fields.js";
-import { handleUnauthorized } from "../auth.js";
-import { getDetailId, redirectToLogin } from "../navigation.js";
-import { getSessionToken } from "../session.js";
-import { formatTimestamp, recordView } from "../records.js";
+} from "./data-fields.js";
+import { handleUnauthorized } from "../../../js/auth.js";
+import { getDetailId, redirectToDataManagement } from "./navigation.js";
+import { getSessionToken } from "../../../js/session.js";
+import { formatTimestamp, recordView } from "./records.js";
 import {
   TODO_CHECKED_KEY,
   TODO_TYPE,
@@ -18,7 +19,7 @@ import {
   isTodoData,
   isTodoKey,
   renumberTodoRows,
-} from "../todo.js";
+} from "./todo.js";
 
 export function initDetailPage() {
   const detailForm = document.querySelector("#detail-form");
@@ -410,7 +411,7 @@ export function initDetailPage() {
 
       if (data.status === "success") {
         detailResult.textContent = "削除しました。";
-        window.location.href = "post.html";
+        redirectToDataManagement();
         return;
       }
 
@@ -434,8 +435,7 @@ export function initDetailPage() {
     return;
   }
 
-  if (!getSessionToken()) {
-    redirectToLogin();
+  if (!requireSession()) {
     return;
   }
 
@@ -506,3 +506,5 @@ export function initDetailPage() {
 
   loadDetail();
 }
+
+initDetailPage();

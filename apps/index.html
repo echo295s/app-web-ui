@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>アプリ選択</title>
+    <link rel="icon" href="../favicon.ico" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="page-header">
+        <div>
+          <p class="eyebrow">APP LAUNCHER</p>
+          <h1>アプリ選択</h1>
+        </div>
+        <button id="logout-button" type="button">ログアウト</button>
+      </div>
+
+      <section class="app-grid" aria-label="利用可能なアプリ">
+        <a class="app-card" href="./data-management/index.html">
+          <span class="app-card-badge">DATA</span>
+          <span class="app-card-title">データ管理アプリ</span>
+          <span class="app-card-description">
+            データの登録、検索、更新、削除を行います。
+          </span>
+        </a>
+
+        <a class="app-card" href="./dummy/index.html">
+          <span class="app-card-badge">DUMMY</span>
+          <span class="app-card-title">ダミーアプリ</span>
+          <span class="app-card-description">
+            アプリ追加時の構成例として用意したサンプルです。
+          </span>
+        </a>
+      </section>
+    </main>
+
+    <script type="module" src="./js/selector.js"></script>
+  </body>
+</html>

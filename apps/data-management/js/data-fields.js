@@ -54,7 +54,10 @@
   deleteButton.title = "行を削除";
 
   const deleteIcon = document.createElement("img");
-  deleteIcon.src = "./assets/trash-can-solid-full.svg";
+  deleteIcon.src = new URL(
+    "../../../assets/trash-can-solid-full.svg",
+    import.meta.url,
+  ).href;
   deleteIcon.alt = "";
   deleteIcon.setAttribute("aria-hidden", "true");
 

@@ -1,95 +1,16 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>データ詳細</title>
-    <link rel="icon" href="./favicon.ico" />
-    <link rel="stylesheet" href="style.css" />
+    <title>データ詳細へ移動</title>
+    <script>
+      window.location.replace(
+        `./apps/data-management/detail.html${window.location.search}${window.location.hash}`,
+      );
+    </script>
   </head>
   <body>
-    <main>
-      <div class="page-header">
-        <h1>データ詳細</h1>
-        <a class="button-link" href="post.html">一覧へ戻る</a>
-      </div>
-
-      <section class="panel" aria-labelledby="detail-heading">
-        <div class="section-header">
-          <h2 id="detail-heading">更新</h2>
-          <div class="button-row">
-            <button class="danger-button delete-button" id="delete-button" type="button">削除</button>
-            <button class="submit-button" type="submit" form="detail-form">更新</button>
-          </div>
-        </div>
-
-        <dl class="record-meta">
-          <div>
-            <dt>ID</dt>
-            <dd id="detail-id">-</dd>
-          </div>
-          <div>
-            <dt>Updated</dt>
-            <dd id="detail-updated">-</dd>
-          </div>
-        </dl>
-
-        <form id="detail-form">
-          <div class="field-group">
-            <table class="data-fields-table">
-              <thead>
-                <tr>
-                  <th>Key</th>
-                  <th>Value</th>
-                  <th class="data-field-action-heading" aria-label="削除"></th>
-                </tr>
-              </thead>
-              <tbody id="detail-data-fields">
-                <tr class="data-field-row">
-                  <td>
-                    <input name="dataKey" type="text" aria-label="Key" required />
-                  </td>
-                  <td>
-                    <input name="dataValue" type="text" aria-label="Value" required />
-                  </td>
-                  <td class="data-field-action-cell">
-                    <button
-                      class="field-row-delete-button delete-button"
-                      type="button"
-                      disabled
-                      data-disabled-delete
-                      aria-label="行を削除"
-                      title="行を削除"
-                    >
-                      <img src="./assets/trash-can-solid-full.svg" alt="" aria-hidden="true" />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <button id="detail-add-field-button" type="button">＋</button>
-          </div>
-
-          <label id="article-body-field" hidden>
-            Body
-            <textarea id="article-body-input" class="article-body-input" rows="14"></textarea>
-          </label>
-
-          <div id="todo-check-field" class="todo-check-field" hidden>
-            <h3>チェック状態</h3>
-            <div id="todo-check-list" class="todo-check-list"></div>
-          </div>
-
-          <label id="raw-data-field" hidden>
-            Raw Data
-            <textarea id="raw-data-input" rows="8" readonly></textarea>
-          </label>
-        </form>
-
-        <p id="detail-result">取得中...</p>
-      </section>
-    </main>
-
-    <script type="module" src="./js/script.js"></script>
+    <p><a href="./apps/data-management/index.html">データ管理へ移動</a></p>
   </body>
 </html>

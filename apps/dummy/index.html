@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ダミーアプリ</title>
+    <link rel="icon" href="../../favicon.ico" />
+    <link rel="stylesheet" href="../../style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="page-header">
+        <h1>ダミーアプリ</h1>
+        <a class="button-link" href="../index.html">アプリ選択へ</a>
+      </div>
+
+      <section class="panel" aria-labelledby="dummy-heading">
+        <div class="section-header">
+          <h2 id="dummy-heading">動作確認</h2>
+        </div>
+        <p>独立したアプリフォルダのサンプル画面です。</p>
+        <button id="dummy-action-button" type="button">ダミー処理を実行</button>
+        <p id="dummy-result" aria-live="polite">未実行です。</p>
+      </section>
+
+      <div class="logout-area">
+        <button id="logout-button" type="button">ログアウト</button>
+      </div>
+    </main>
+
+    <script type="module" src="./js/index.js"></script>
+  </body>
+</html>
