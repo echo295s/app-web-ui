@@ -12,8 +12,6 @@ https://echo295s.github.io/app-web-ui/
 - `style.css`: 共通スタイル
 - `gas/`: Google Apps Script API コード
 
-旧URLの `post.html` と `detail.html` は、データ管理アプリ配下の新URLへ転送します。
-
 ## 設定
 
 フロントエンドの接続先は `js/config.js` の `API_ENDPOINT_URL` に設定します。
