@@ -275,29 +275,6 @@ h2 {
   background: #171717;
   color: #eee;
   text-decoration: none;
-  transition:
-    border-color 120ms ease,
-    background 120ms ease,
-    transform 120ms ease;
-}
-
-.app-card:hover {
-  border-color: #3b82f6;
-  background: #1b1b1b;
-  color: #fff;
-  text-decoration: none;
-  transform: translateY(-2px);
-}
-
-.app-card-badge {
-  justify-self: start;
-  border: 1px solid #3b82f6;
-  border-radius: 999px;
-  padding: 4px 9px;
-  color: #93c5fd;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
 }
 
 .app-card-title {
